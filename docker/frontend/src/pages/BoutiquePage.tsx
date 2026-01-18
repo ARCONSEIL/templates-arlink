@@ -297,7 +297,7 @@ export default function BoutiquePage({ subdomain }: BoutiquePageProps) {
                     <h4 className="text-[#EDE6D2] font-semibold truncate">{product.nom}</h4>
                     {product.titre && <p className="text-[#CFC6AE] text-sm truncate">{product.titre}</p>}
                     <div className="flex items-center justify-between mt-3">
-                      <span className="text-[#BFA26A] font-bold text-lg">{product.prix.toFixed(2)} EUR</span>
+                      <span className="text-[#BFA26A] font-bold text-lg">{Number(product.prix || 0).toFixed(2)} EUR</span>
                       <button onClick={(e) => { e.stopPropagation(); addToCart(product); }} className="px-3 py-2 bg-[#BFA26A] text-black font-bold rounded-xl text-sm hover:brightness-95">+ Panier</button>
                     </div>
                   </div>
@@ -340,7 +340,7 @@ export default function BoutiquePage({ subdomain }: BoutiquePageProps) {
                     </div>
                     <p className="text-[#CFC6AE] mt-4 leading-relaxed">{selectedProduct.description}</p>
                     <div className="mt-6 flex items-end justify-between">
-                      <div className="text-3xl font-semibold text-[#EDE6D2]">{selectedProduct.prix.toFixed(2)} EUR</div>
+                      <div className="text-3xl font-semibold text-[#EDE6D2]">{Number(selectedProduct.prix || 0).toFixed(2)} EUR</div>
                       <div className="text-sm">{selectedProduct.stock && selectedProduct.stock > 0 ? <span className="px-3 py-1 bg-[#22C55E]/20 border border-[#22C55E]/40 rounded-full text-[#EDE6D2]">En stock ({selectedProduct.stock})</span> : <span className="px-3 py-1 bg-[#EF4444]/20 border border-[#EF4444]/40 rounded-full text-[#EDE6D2]">Rupture</span>}</div>
                     </div>
 
