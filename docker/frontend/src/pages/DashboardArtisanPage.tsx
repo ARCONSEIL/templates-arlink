@@ -380,10 +380,33 @@ export default function DashboardArtisanPage() {
             </div>
           )}
 
-          {activeSection === 'add' && (
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-[#EDE6D2]">Ajouter un article</h2>
-              <div className="rounded-3xl border border-[#232a33] bg-[#14181d] p-6">
+                    {activeSection === 'add' && (
+                      <div className="space-y-6">
+                        <h2 className="text-2xl font-bold text-[#EDE6D2]">Ajouter un article</h2>
+              
+                        <div className="rounded-2xl border border-[#EF4444]/50 bg-[#EF4444]/10 p-4">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 rounded-full bg-[#EF4444]/20 flex items-center justify-center text-xl flex-shrink-0">⚠️</div>
+                            <div>
+                              <h4 className="font-bold text-[#EF4444]">AVERTISSEMENT - Produits Interdits</h4>
+                              <p className="text-sm text-[#EDE6D2] mt-1">
+                                La vente des produits suivants est <strong>strictement interdite</strong> sur ARLink:
+                              </p>
+                              <ul className="text-sm text-[#CFC6AE] mt-2 space-y-1">
+                                <li>• <strong>Armes</strong> (blanches, a feu, repliques, munitions)</li>
+                                <li>• <strong>Produits illicites</strong> (drogues, substances controlees)</li>
+                                <li>• <strong>Produits dangereux</strong> (explosifs, produits chimiques nocifs)</li>
+                                <li>• <strong>Contrefacons</strong> et produits portant atteinte aux droits d'auteur</li>
+                                <li>• <strong>Produits non conformes</strong> aux normes de securite europeennes</li>
+                              </ul>
+                              <p className="text-xs text-[#EF4444] mt-3 font-semibold">
+                                Tout manquement entrainera la suspension immediate du compte et des poursuites legales.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="rounded-3xl border border-[#232a33] bg-[#14181d] p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="text-sm text-[#CFC6AE] block mb-2">Nom du produit *</label>
