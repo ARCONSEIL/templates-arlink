@@ -181,6 +181,12 @@ export default function BoutiquePage({ subdomain }: BoutiquePageProps) {
     setNewReview({ name: '', rating: 5, text: '' })
   }
 
+  const getImageUrl = (img?: string) => {
+    if (!img || img === '/') return ''
+    if (img.startsWith('http')) return img
+    return `https://arlink.online${img}`
+  }
+
   const filteredProducts = products.filter(p => 
     p.nom.toLowerCase().includes(searchQuery.toLowerCase()) ||
     p.description?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -215,8 +221,7 @@ export default function BoutiquePage({ subdomain }: BoutiquePageProps) {
               <span className="text-[#BFA26A]">AR</span>
             </Link>
             <div>
-              <div className="text-xl font-semibold tracking-wide text-[#EDE6D2]">{subdomain ? `${subdomain}.arlink.online` : boutique.societe}</div>
-              <div className="text-xs text-[#CFC6AE]">Boutique artisanale - {boutique.categorie} - IA</div>
+              <div className="text-xl font-semibold tracking-wide text-[#EDE6D2]">{boutique.societe}</div>
             </div>
           </div>
 
@@ -277,7 +282,6 @@ export default function BoutiquePage({ subdomain }: BoutiquePageProps) {
                 </div>
                 <div className="flex gap-3">
                   <button onClick={() => setView('checkout')} className="px-5 py-3 bg-[#BFA26A] text-black font-black rounded-2xl transition hover:brightness-95">Payer</button>
-                  <button onClick={() => setShowCart(true)} className="px-5 py-3 bg-[#141414] border border-[#2a2a2a] rounded-2xl transition hover:border-[#BFA26A]">Panier</button>
                 </div>
               </div>
             </div>
@@ -291,7 +295,7 @@ export default function BoutiquePage({ subdomain }: BoutiquePageProps) {
               {filteredProducts.map((product) => (
                 <div key={product.id} onClick={() => { setSelectedProduct(product); setQuantity(1); setSelectedColor(product.colors?.[0] || ''); setSelectedImage(product.img1 || ''); setView('product'); }} className="bg-[#0f0f0f] border border-[#1f1f1f] rounded-3xl overflow-hidden cursor-pointer transition hover:border-[#BFA26A] hover:-translate-y-1">
                   <div className="h-48 bg-[#141414] relative">
-                    {product.img1 ? <img src={product.img1} alt={product.nom} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-4xl">📦</div>}
+                    {getImageUrl(product.img1) ? <img src={getImageUrl(product.img1)} alt={product.nom} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-4xl">📦</div>}
                     {product.stock && product.stock < 5 && <span className="absolute top-3 right-3 px-2 py-1 bg-[#EF4444]/20 border border-[#EF4444]/40 rounded-full text-xs text-[#EDE6D2]">Stock limite</span>}
                   </div>
                   <div className="p-4">
@@ -324,11 +328,11 @@ export default function BoutiquePage({ subdomain }: BoutiquePageProps) {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div className="bg-[#0f0f0f] border border-[#1f1f1f] rounded-3xl overflow-hidden shadow-xl">
-                      <div className="h-[520px] bg-[#141414]"><img src={selectedImage || selectedProduct.img1} alt={selectedProduct.nom} className="w-full h-full object-cover" /></div>
+                      <div className="h-[520px] bg-[#141414]"><img src={getImageUrl(selectedImage || selectedProduct.img1)} alt={selectedProduct.nom} className="w-full h-full object-cover" /></div>
                     </div>
                                         <div className="grid grid-cols-4 gap-3">
                                           {[selectedProduct.img1, selectedProduct.img2, selectedProduct.img3, selectedProduct.img4].filter(Boolean).map((img, i) => (
-                                            <div key={i} onClick={() => setSelectedImage(img as string)} className={`h-20 bg-[#0f0f0f] border rounded-xl overflow-hidden cursor-pointer transition ${(selectedImage || selectedProduct.img1) === img ? 'border-[#BFA26A]' : 'border-[#1f1f1f] hover:border-[#BFA26A]'}`}><img src={img} alt="" className="w-full h-full object-cover" /></div>
+                                            <div key={i} onClick={() => setSelectedImage(img as string)} className={`h-20 bg-[#0f0f0f] border rounded-xl overflow-hidden cursor-pointer transition ${(selectedImage || selectedProduct.img1) === img ? 'border-[#BFA26A]' : 'border-[#1f1f1f] hover:border-[#BFA26A]'}`}><img src={getImageUrl(img)} alt="" className="w-full h-full object-cover" /></div>
                                           ))}
                                         </div>
                   </div>
