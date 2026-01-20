@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react'
+import { ChevronLeft, ChevronRight, MapPin, ArrowLeft } from 'lucide-react'
 import { boutiquesService, productsService } from '../services/api'
 
 interface Product {
@@ -166,9 +166,10 @@ export default function GaleriePage() {
       >
         <Link 
           to="/" 
-          className="absolute top-5 left-10 bg-transparent text-[rgba(201,169,97,0.8)] px-4 py-2 border border-[rgba(201,169,97,0.5)] rounded-md font-light text-sm cursor-pointer no-underline transition-all duration-300 tracking-wider hover:bg-[rgba(201,169,97,0.1)] hover:border-[rgba(201,169,97,0.8)] hover:text-[#c9a961]"
+          className="absolute top-5 left-10 w-12 h-12 rounded-xl bg-[#141414] border border-[#2a2a2a] flex items-center justify-center hover:border-[#BFA26A] transition-all duration-300"
+          title="Retour à l'accueil"
         >
-          ← Retour
+          <ArrowLeft className="w-5 h-5 text-[#BFA26A]" />
         </Link>
         <div className="text-[64px] font-bold text-white flex items-center gap-5" style={{ textShadow: '0 4px 20px rgba(0,0,0,0.8)' }}>
           {isSearchMode ? (

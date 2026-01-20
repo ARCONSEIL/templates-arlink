@@ -215,7 +215,7 @@ export default function BoutiquePage({ subdomain }: BoutiquePageProps) {
     return categoryMap[categorie] || categorie.toLowerCase()
   }
 
-  const galerieUrl = boutique?.categorie ? `/galerie?cat=${getCategoryKey(boutique.categorie)}` : '/galerie'
+  const galerieUrl = boutique?.categorie ? `https://arlink.online/galerie?cat=${getCategoryKey(boutique.categorie)}` : 'https://arlink.online/galerie'
 
   const filteredProducts = products.filter(p => 
     p.nom.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -247,9 +247,9 @@ export default function BoutiquePage({ subdomain }: BoutiquePageProps) {
       <header className="sticky top-0 z-50 bg-[#0b0b0b]/92 backdrop-blur-md border-b border-[#1d1d1d]">
         <div className="max-w-7xl mx-auto px-5 py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-                        <Link to={galerieUrl} className="w-10 h-10 rounded-xl bg-[#141414] border border-[#2a2a2a] flex items-center justify-center hover:border-[#BFA26A] transition" title={boutique.categorie ? `Retour à la galerie ${boutique.categorie}` : 'Retour à la galerie'}>
+                        <a href={galerieUrl} className="w-10 h-10 rounded-xl bg-[#141414] border border-[#2a2a2a] flex items-center justify-center hover:border-[#BFA26A] transition" title={boutique.categorie ? `Retour à la galerie ${boutique.categorie}` : 'Retour à la galerie'}>
                           <ArrowLeft className="w-5 h-5 text-[#BFA26A]" />
-                        </Link>
+                        </a>
             <div>
               <div className="text-xl font-semibold tracking-wide text-[#EDE6D2]">{boutique.societe}</div>
             </div>
@@ -296,16 +296,12 @@ export default function BoutiquePage({ subdomain }: BoutiquePageProps) {
                         </div>
                       </div>
                       <div className="hidden md:flex flex-col gap-2 min-w-[180px]">
-                        {boutique.reseauxSociaux?.whatsapp && (
-                          <a href={`https://wa.me/${boutique.reseauxSociaux.whatsapp}`} className="bg-[#22C55E] text-[#031b0c] font-black rounded-2xl px-4 py-3 flex items-center justify-center gap-2 hover:brightness-95">
-                            <MessageCircle className="w-4 h-4" /> WhatsApp
-                          </a>
-                        )}
-                        {boutique.artisan?.telephone && (
-                          <a href={`tel:${boutique.artisan.telephone}`} className="bg-[#141414] border border-[#2a2a2a] rounded-2xl px-4 py-3 hover:border-[#3B82F6] transition flex items-center justify-center gap-2">
-                            <Phone className="w-4 h-4" /> Appeler
-                          </a>
-                        )}
+                        <a href="https://wa.me/33768084103" target="_blank" rel="noopener noreferrer" className="bg-[#22C55E] text-[#031b0c] font-black rounded-2xl px-4 py-3 flex items-center justify-center gap-2 hover:brightness-95">
+                          <MessageCircle className="w-4 h-4" /> WhatsApp
+                        </a>
+                        <a href="tel:+33768084103" className="bg-[#141414] border border-[#2a2a2a] rounded-2xl px-4 py-3 hover:border-[#3B82F6] transition flex items-center justify-center gap-2">
+                          <Phone className="w-4 h-4" /> Appeler
+                        </a>
                       </div>
                     </div>
                   </div>

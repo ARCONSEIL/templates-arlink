@@ -94,6 +94,25 @@ const SUPPORT_TEMPLATES = [
   'Resolu - merci pour votre patience'
 ]
 
+// Categories principales avec numeros WhatsApp
+interface CategoryWhatsApp {
+  id: string
+  name: string
+  emoji: string
+  whatsappNumber: string
+  responsable: string
+}
+
+const DEFAULT_CATEGORY_WHATSAPP: CategoryWhatsApp[] = [
+  { id: 'bijoux', name: 'Bijoux & Orfevrerie', emoji: '💎', whatsappNumber: '33768084103', responsable: 'ARLink Support' },
+  { id: 'cuir', name: 'Cuir & Maroquinerie', emoji: '👜', whatsappNumber: '33768084103', responsable: 'ARLink Support' },
+  { id: 'textile', name: 'Textile & Mode', emoji: '🧵', whatsappNumber: '33768084103', responsable: 'ARLink Support' },
+  { id: 'cosmetique', name: 'Cosmetique naturelle', emoji: '🌿', whatsappNumber: '33768084103', responsable: 'ARLink Support' },
+  { id: 'gastronomie', name: 'Gastronomie & Terroir', emoji: '🍽️', whatsappNumber: '33768084103', responsable: 'ARLink Support' },
+  { id: 'artisanat', name: 'Artisanat traditionnel', emoji: '🏺', whatsappNumber: '33768084103', responsable: 'ARLink Support' },
+  { id: 'coffrets', name: 'Coffrets & Cadeaux', emoji: '🎁', whatsappNumber: '33768084103', responsable: 'ARLink Support' },
+]
+
 export default function AdminDashboardPage() {
   const navigate = useNavigate()
   const { logout } = useAuthStore()
@@ -109,6 +128,13 @@ export default function AdminDashboardPage() {
   const [articles, setArticles] = useState<Article[]>(sampleArticles)
   const [commandes, setCommandes] = useState<Commande[]>(sampleCommandes)
   const [tickets, setTickets] = useState<TicketSupport[]>(sampleTickets)
+  
+  // Gestion des numeros WhatsApp par categorie
+  const [categoryWhatsApp, setCategoryWhatsApp] = useState<CategoryWhatsApp[]>(() => {
+    const saved = localStorage.getItem('arlink_category_whatsapp')
+    return saved ? JSON.parse(saved) : DEFAULT_CATEGORY_WHATSAPP
+  })
+  const [editingCategory, setEditingCategory] = useState<string | null>(null)
   
   const [editingArtisan, setEditingArtisan] = useState<string | null>(null)
   
@@ -232,6 +258,7 @@ export default function AdminDashboardPage() {
   const navItems = [
     { id: 'dashboard', icon: '📊', label: 'Tableau de bord' },
     { id: 'crm', icon: '📋', label: 'CRM Artisans' },
+    { id: 'whatsapp', icon: '📱', label: 'WhatsApp Categories' },
     { id: 'vedettes', icon: '⭐', label: 'Boutiques Vedettes' },
     { id: 'artisans', icon: '👥', label: 'Artisans' },
     { id: 'boutiques', icon: '🏪', label: 'Boutiques' },
@@ -241,6 +268,17 @@ export default function AdminDashboardPage() {
     { id: 'merge', icon: '🔗', label: 'Fusion comptes' },
     { id: 'home', icon: '🏠', label: 'Accueil', link: '/' },
   ]
+
+  // Fonctions de gestion WhatsApp par categorie
+  const handleUpdateCategoryWhatsApp = (id: string, field: string, value: string) => {
+    setCategoryWhatsApp(prev => prev.map(c => c.id === id ? { ...c, [field]: value } : c))
+  }
+
+  const handleSaveCategoryWhatsApp = () => {
+    localStorage.setItem('arlink_category_whatsapp', JSON.stringify(categoryWhatsApp))
+    showNotification('success', 'Numeros WhatsApp sauvegardes!')
+    setEditingCategory(null)
+  }
 
   const artisansActifs = artisans.filter(a => a.status === 'ACTIF').length
   const boutiquesActives = boutiques.filter(b => b.status === 'ACTIVE').length
@@ -567,6 +605,94 @@ export default function AdminDashboardPage() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            </div>
+          )}
+
+          {activeSection === 'whatsapp' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold">Gestion WhatsApp par Categorie</h2>
+                <p className="text-sm text-[#CFC6AE]">Numero par defaut: +33 7 68 08 41 03</p>
+              </div>
+              
+              <div className="rounded-2xl border border-[#232a33] bg-[#14181d] p-5 mb-6">
+                <p className="text-[#CFC6AE] text-sm mb-2">Chaque categorie peut avoir un responsable WhatsApp different.</p>
+                <p className="text-[#CFC6AE] text-sm">Les clients contacteront le numero associe a la categorie de la boutique qu'ils visitent.</p>
+              </div>
+
+              <div className="rounded-2xl border border-[#1a1a1a] bg-[#0a0c0f] overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="bg-[#14181d]">
+                    <tr className="border-b border-[#1a1a1a]">
+                      <th className="px-4 py-3 text-left text-xs text-[#CFC6AE]">Categorie</th>
+                      <th className="px-4 py-3 text-left text-xs text-[#CFC6AE]">Numero WhatsApp</th>
+                      <th className="px-4 py-3 text-left text-xs text-[#CFC6AE]">Responsable</th>
+                      <th className="px-4 py-3 text-left text-xs text-[#CFC6AE]">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {categoryWhatsApp.map(cat => (
+                      <tr key={cat.id} className="border-b border-[#1a1a1a] hover:bg-[#14181d]/50">
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xl">{cat.emoji}</span>
+                            <span className="font-medium">{cat.name}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          {editingCategory === cat.id ? (
+                            <input 
+                              value={cat.whatsappNumber} 
+                              onChange={(e) => handleUpdateCategoryWhatsApp(cat.id, 'whatsappNumber', e.target.value)} 
+                              className="bg-[#0d0f12] border border-[#232a33] rounded px-3 py-2 text-sm w-40"
+                              placeholder="33768084103"
+                            />
+                          ) : (
+                            <a href={`https://wa.me/${cat.whatsappNumber}`} target="_blank" rel="noopener noreferrer" className="text-[#22C55E] hover:underline">
+                              +{cat.whatsappNumber}
+                            </a>
+                          )}
+                        </td>
+                        <td className="px-4 py-3">
+                          {editingCategory === cat.id ? (
+                            <input 
+                              value={cat.responsable} 
+                              onChange={(e) => handleUpdateCategoryWhatsApp(cat.id, 'responsable', e.target.value)} 
+                              className="bg-[#0d0f12] border border-[#232a33] rounded px-3 py-2 text-sm w-40"
+                              placeholder="Nom du responsable"
+                            />
+                          ) : (
+                            <span className="text-[#CFC6AE]">{cat.responsable}</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex gap-2">
+                            {editingCategory === cat.id ? (
+                              <button onClick={handleSaveCategoryWhatsApp} className="px-3 py-1.5 bg-green-500 text-white rounded-lg text-xs font-medium hover:bg-green-600">
+                                <Save className="w-4 h-4 inline mr-1" /> Sauvegarder
+                              </button>
+                            ) : (
+                              <button onClick={() => setEditingCategory(cat.id)} className="px-3 py-1.5 bg-[#BFA26A] text-black rounded-lg text-xs font-medium hover:brightness-95">
+                                <Edit2 className="w-4 h-4 inline mr-1" /> Modifier
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              
+              <div className="rounded-2xl border border-[#232a33] bg-[#14181d] p-5">
+                <h3 className="font-bold mb-3">Comment ca fonctionne</h3>
+                <ul className="text-sm text-[#CFC6AE] space-y-2">
+                  <li>1. Chaque categorie a un numero WhatsApp associe</li>
+                  <li>2. Quand un client visite une boutique, le bouton WhatsApp utilise le numero de la categorie</li>
+                  <li>3. Vous pouvez assigner un responsable different pour chaque categorie</li>
+                  <li>4. Les modifications sont sauvegardees automatiquement</li>
+                </ul>
               </div>
             </div>
           )}
