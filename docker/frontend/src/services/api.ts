@@ -72,4 +72,42 @@ export const statsService = {
   getBoutique: (boutiqueId: string) => api.get(`/stats/boutique/${boutiqueId}`),
 }
 
+export const ordersService = {
+  getAll: (params?: Record<string, string>) => api.get('/orders', { params }),
+  getById: (id: string) => api.get(`/orders/${id}`),
+  getMyOrders: () => api.get('/orders/my'),
+  getArtisanOrders: () => api.get('/orders/artisan'),
+  updateStatus: (id: string, status: string) => api.patch(`/orders/${id}/status`, { status }),
+  create: (data: Record<string, unknown>) => api.post('/orders', data),
+}
+
+export const uploadService = {
+  uploadImage: (file: File, onProgress?: (progress: number) => void) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    return api.post('/upload/image', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      onUploadProgress: (progressEvent) => {
+        if (onProgress && progressEvent.total) {
+          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+          onProgress(progress)
+        }
+      }
+    })
+  },
+  uploadImages: (files: File[], onProgress?: (progress: number) => void) => {
+    const formData = new FormData()
+    files.forEach(file => formData.append('files', file))
+    return api.post('/upload/images', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      onUploadProgress: (progressEvent) => {
+        if (onProgress && progressEvent.total) {
+          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+          onProgress(progress)
+        }
+      }
+    })
+  }
+}
+
 export default api
