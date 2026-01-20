@@ -393,14 +393,26 @@ export default function DashboardArtisanPage() {
                     <label className="text-sm text-[#CFC6AE] block mb-2">Categorie</label>
                     <select value={newProduct.categorie} onChange={(e) => setNewProduct({...newProduct, categorie: e.target.value})} className="w-full bg-[#0d0f12] border border-[#232a33] rounded-xl px-4 py-3 outline-none focus:border-[#BFA26A] text-[#EDE6D2]">
                       <option value="">Selectionner...</option>
-                      <option value="Bijoux">Bijoux</option>
-                      <option value="Textile">Textile</option>
-                      <option value="Ceramique">Ceramique</option>
-                      <option value="Cuir">Cuir</option>
-                      <option value="Bois">Bois</option>
-                      <option value="Metal">Metal</option>
-                      <option value="Cosmetique">Cosmetique</option>
-                      <option value="Alimentaire">Alimentaire</option>
+                      <option value="Bijoux">💎 Bijoux & Orfèvrerie</option>
+                      <option value="Cuir">👜 Cuir & Maroquinerie</option>
+                      <option value="Bois">🪵 Bois & Sculpture</option>
+                      <option value="Metal">⚒️ Métal & Ferronnerie</option>
+                      <option value="Textile">🧵 Textile, Soie & Broderie</option>
+                      <option value="Poterie">🏺 Poterie & Céramique</option>
+                      <option value="Verre">🥃 Verre & Cristal</option>
+                      <option value="Pierre">💠 Pierre & Minéraux</option>
+                      <option value="Vannerie">🧺 Vannerie & Tapisserie</option>
+                      <option value="Arts-manuels">✋ Arts manuels</option>
+                      <option value="Cosmetique">🌿 Cosmétique naturelle</option>
+                      <option value="Mode">👗 Accessoires & Mode</option>
+                      <option value="Art-sacre">🕌 Art sacré</option>
+                      <option value="Patisserie">🍰 Pâtisserie artisanale</option>
+                      <option value="Gastronomie">🍽️ Produits gourmets</option>
+                      <option value="Huiles">🫒 Huiles & Terroir</option>
+                      <option value="Coffrets">🎁 Coffrets</option>
+                      <option value="Maghreb">🌙 Maghreb</option>
+                      <option value="Afrique-Ouest">🌍 Afrique Ouest</option>
+                      <option value="Afrique-centrale">🥁 Afrique centrale</option>
                     </select>
                   </div>
                   <div className="md:col-span-2">
@@ -752,7 +764,29 @@ export default function DashboardArtisanPage() {
               </div>
               <div>
                 <label className="text-sm text-[#CFC6AE] block mb-2">Categorie</label>
-                <input value={editingProduct.categorie} onChange={(e) => setEditingProduct({...editingProduct, categorie: e.target.value})} className="w-full bg-[#0d0f12] border border-[#232a33] rounded-xl px-4 py-3 outline-none focus:border-[#BFA26A] text-[#EDE6D2]" />
+                <select value={editingProduct.categorie} onChange={(e) => setEditingProduct({...editingProduct, categorie: e.target.value})} className="w-full bg-[#0d0f12] border border-[#232a33] rounded-xl px-4 py-3 outline-none focus:border-[#BFA26A] text-[#EDE6D2]">
+                  <option value="">Selectionner...</option>
+                  <option value="Bijoux">💎 Bijoux & Orfèvrerie</option>
+                  <option value="Cuir">👜 Cuir & Maroquinerie</option>
+                  <option value="Bois">🪵 Bois & Sculpture</option>
+                  <option value="Metal">⚒️ Métal & Ferronnerie</option>
+                  <option value="Textile">🧵 Textile, Soie & Broderie</option>
+                  <option value="Poterie">🏺 Poterie & Céramique</option>
+                  <option value="Verre">🥃 Verre & Cristal</option>
+                  <option value="Pierre">💠 Pierre & Minéraux</option>
+                  <option value="Vannerie">🧺 Vannerie & Tapisserie</option>
+                  <option value="Arts-manuels">✋ Arts manuels</option>
+                  <option value="Cosmetique">🌿 Cosmétique naturelle</option>
+                  <option value="Mode">👗 Accessoires & Mode</option>
+                  <option value="Art-sacre">🕌 Art sacré</option>
+                  <option value="Patisserie">🍰 Pâtisserie artisanale</option>
+                  <option value="Gastronomie">🍽️ Produits gourmets</option>
+                  <option value="Huiles">🫒 Huiles & Terroir</option>
+                  <option value="Coffrets">🎁 Coffrets</option>
+                  <option value="Maghreb">🌙 Maghreb</option>
+                  <option value="Afrique-Ouest">🌍 Afrique Ouest</option>
+                  <option value="Afrique-centrale">🥁 Afrique centrale</option>
+                </select>
               </div>
               <div className="md:col-span-2">
                 <label className="text-sm text-[#CFC6AE] block mb-2">Description</label>
