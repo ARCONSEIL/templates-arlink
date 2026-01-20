@@ -215,14 +215,48 @@ docker exec -it arlink-postgres psql -U arlink -d arlink_v2
 
 ---
 
-## Notes Importantes
+## Boutiques en Vedette (Homepage)
 
-1. **Mot de passe interne:** 7asbia@ALLAHO (pour DB et admin)
-2. **Les modifications CRM sont en memoire** - pas de persistance backend actuellement
-3. **Les 56 boutiques n'ont pas de photos** - impossible de les mettre en vedette
-4. **Google OAuth configure** avec credentials dans variables d'environnement
+Les boutiques suivantes apparaissent dans la section "Boutiques en Vedette":
+- Atelier creatif (ateliercreatif.arlink.online)
+- Adhamed (adhamed.arlink.online)
+- Solution seneve (solutionseneve.arlink.online)
+- Afrikration (afrikration.arlink.online)
+- Dar Lakbira (darlakbira.arlink.online)
+- MISS DATTES (missdattes.arlink.online)
 
 ---
 
-*Document genere le 20 Janvier 2026*
+## Fonctionnalites Recentes
+
+1. **Bouton retour galerie** - Fleche en haut a gauche des pages boutiques pour retourner a /galerie
+2. **Recherche amelioree** - Recherche par nom de boutique, subDomain, ville, pays et produits
+3. **Photos produits** - Les images des produits s'affichent correctement avec le prefixe https://arlink.online
+4. **Boutiques vedettes** - Priorite aux boutiques avec produits (Afrikration, etc.)
+
+---
+
+## Notes Importantes
+
+1. **Mot de passe interne:** 7asbia@ALLAHO (pour DB et admin)
+2. **Mot de passe serveur SSH:** YmzBz5n5
+3. **Les modifications CRM sont en memoire** - pas de persistance backend actuellement
+4. **Google OAuth configure** avec credentials dans variables d'environnement
+5. **Uploads directory:** /var/www/arlink-prod/uploads/ (images produits)
+
+---
+
+## Resume des Acces
+
+| Service | URL/Host | Identifiant | Mot de passe |
+|---------|----------|-------------|--------------|
+| Site Web | https://arlink.online | - | - |
+| SSH Serveur | 217.154.2.83 | root | YmzBz5n5 |
+| PostgreSQL | localhost:5433 | arlink | arlink_secure_2026 |
+| Admin Dashboard | /admin | arlink.online@gmail.com | 7asbia@ALLAHO |
+| Super Admin | /super-admin | arlink.online@gmail.com | 7asbia@ALLAHO |
+
+---
+
+*Document mis a jour le 20 Janvier 2026*
 *ARLink V2 - Plateforme E-commerce Artisans*

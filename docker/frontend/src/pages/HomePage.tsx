@@ -511,7 +511,18 @@ export default function HomePage() {
             <section className="bg-dark-light p-6 border-t border-dark-medium">
               <h2 className="text-gold font-display text-xl mb-4">Boutiques en Vedette</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                {mapBoutiques.filter(b => b.productImage).slice(0, 6).map((boutique) => {
+                {(() => {
+                  // Priority boutiques that should always appear first if they have images
+                  const prioritySubdomains = ['afrikration', 'ateliercreatif', 'adhamed', 'darlakbira', 'missdattes', 'azurhouse', 'irya', 'solutionseneve']
+                  const boutiquesWithImages = mapBoutiques.filter(b => b.productImage)
+                  const priorityBoutiques = boutiquesWithImages.filter(b => 
+                    b.subDomain && prioritySubdomains.includes(b.subDomain.toLowerCase())
+                  )
+                  const otherBoutiques = boutiquesWithImages.filter(b => 
+                    !b.subDomain || !prioritySubdomains.includes(b.subDomain.toLowerCase())
+                  )
+                  return [...priorityBoutiques, ...otherBoutiques].slice(0, 6)
+                })().map((boutique) => {
                   const imageUrl = boutique.productImage || boutique.image || boutique.logo || (boutique.subDomain ? FEATURED_BOUTIQUE_IMAGES[boutique.subDomain.toLowerCase()] : null)
                   return boutique.subDomain ? (
                     <a

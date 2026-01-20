@@ -114,10 +114,12 @@ export default function GaleriePage() {
   const filteredBoutiques = isSearchMode 
     ? boutiques.filter(b => {
         const query = searchQuery.toLowerCase()
-        // Search in boutique name
+        // Search in boutique name, subDomain, and location
         const matchesBoutique = b.societe?.toLowerCase().includes(query) ||
+          b.subDomain?.toLowerCase().includes(query) ||
           b.description?.toLowerCase().includes(query) ||
-          b.ville?.toLowerCase().includes(query)
+          b.ville?.toLowerCase().includes(query) ||
+          b.pays?.toLowerCase().includes(query)
         // Search in products
         const matchesProducts = b.matchingProducts?.some(p => 
           p.nom?.toLowerCase().includes(query)

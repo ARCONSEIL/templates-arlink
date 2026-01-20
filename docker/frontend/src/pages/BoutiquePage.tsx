@@ -217,8 +217,8 @@ export default function BoutiquePage({ subdomain }: BoutiquePageProps) {
       <header className="sticky top-0 z-50 bg-[#0b0b0b]/92 backdrop-blur-md border-b border-[#1d1d1d]">
         <div className="max-w-7xl mx-auto px-5 py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <Link to="/" className="w-10 h-10 rounded-xl bg-[#141414] border border-[#2a2a2a] flex items-center justify-center hover:border-[#BFA26A] transition">
-              <span className="text-[#BFA26A]">AR</span>
+            <Link to="/galerie" className="w-10 h-10 rounded-xl bg-[#141414] border border-[#2a2a2a] flex items-center justify-center hover:border-[#BFA26A] transition" title="Retour à la galerie">
+              <ArrowLeft className="w-5 h-5 text-[#BFA26A]" />
             </Link>
             <div>
               <div className="text-xl font-semibold tracking-wide text-[#EDE6D2]">{boutique.societe}</div>
