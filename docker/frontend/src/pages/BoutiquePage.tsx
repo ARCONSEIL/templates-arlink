@@ -187,6 +187,36 @@ export default function BoutiquePage({ subdomain }: BoutiquePageProps) {
     return `https://arlink.online${img}`
   }
 
+  // Map boutique category to galerie URL parameter
+  const getCategoryKey = (categorie?: string) => {
+    if (!categorie) return ''
+    const categoryMap: Record<string, string> = {
+      'Bijoux': 'bijoux',
+      'Cuir': 'cuir',
+      'Bois': 'bois',
+      'Metal': 'metal',
+      'Textile': 'textile',
+      'Poterie': 'poterie',
+      'Verre': 'verre',
+      'Pierre': 'pierre',
+      'Vannerie': 'vannerie',
+      'Arts-manuels': 'arts-manuels',
+      'Cosmetique': 'cosmetique',
+      'Mode': 'mode',
+      'Art-sacre': 'art-sacre',
+      'Patisserie': 'patisserie',
+      'Gastronomie': 'gastronomie',
+      'Huiles': 'huiles',
+      'Coffrets': 'coffrets',
+      'Maghreb': 'maghreb',
+      'Afrique-Ouest': 'afrique-ouest',
+      'Afrique-centrale': 'afrique-centrale'
+    }
+    return categoryMap[categorie] || categorie.toLowerCase()
+  }
+
+  const galerieUrl = boutique?.categorie ? `/galerie?cat=${getCategoryKey(boutique.categorie)}` : '/galerie'
+
   const filteredProducts = products.filter(p => 
     p.nom.toLowerCase().includes(searchQuery.toLowerCase()) ||
     p.description?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -217,9 +247,9 @@ export default function BoutiquePage({ subdomain }: BoutiquePageProps) {
       <header className="sticky top-0 z-50 bg-[#0b0b0b]/92 backdrop-blur-md border-b border-[#1d1d1d]">
         <div className="max-w-7xl mx-auto px-5 py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <Link to="/galerie" className="w-10 h-10 rounded-xl bg-[#141414] border border-[#2a2a2a] flex items-center justify-center hover:border-[#BFA26A] transition" title="Retour à la galerie">
-              <ArrowLeft className="w-5 h-5 text-[#BFA26A]" />
-            </Link>
+                        <Link to={galerieUrl} className="w-10 h-10 rounded-xl bg-[#141414] border border-[#2a2a2a] flex items-center justify-center hover:border-[#BFA26A] transition" title={boutique.categorie ? `Retour à la galerie ${boutique.categorie}` : 'Retour à la galerie'}>
+                          <ArrowLeft className="w-5 h-5 text-[#BFA26A]" />
+                        </Link>
             <div>
               <div className="text-xl font-semibold tracking-wide text-[#EDE6D2]">{boutique.societe}</div>
             </div>
