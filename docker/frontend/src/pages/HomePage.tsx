@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet'
 import { ChevronLeft, ChevronRight, Search, User, Menu } from 'lucide-react'
-import { boutiquesService, categoriesService } from '../services/api'
+import { boutiquesService, categoriesService, productsService } from '../services/api'
 import { useAuthStore } from '../stores/authStore'
 
 const CATEGORIES = [
@@ -35,6 +35,16 @@ const CATEGORIES = [
   { nom: 'Bouquets', slug: 'bouquets', emoji: '💐', image: 'https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=800&q=60' },
 ]
 
+interface Product {
+  id: string
+  nom: string
+  boutiqueId: string
+  img1?: string
+  img2?: string
+  img3?: string
+  prix?: number
+}
+
 interface MapBoutique {
   id: string
   societe: string
@@ -48,6 +58,7 @@ interface MapBoutique {
   subDomain?: string
   featured?: boolean
   featuredImage?: string
+  productImage?: string
 }
 
 const FEATURED_BOUTIQUE_IMAGES: Record<string, string> = {
@@ -83,14 +94,33 @@ export default function HomePage() {
     loadCategories()
   }, [])
 
-  const loadMapData = async () => {
-    try {
-      const response = await boutiquesService.getMapData()
-      setMapBoutiques(response.data)
-    } catch (error) {
-      console.error('Error loading map data:', error)
+    const loadMapData = async () => {
+      try {
+        const [boutiquesResponse, productsResponse] = await Promise.all([
+          boutiquesService.getMapData(),
+          productsService.getAll()
+        ])
+      
+        const products: Product[] = productsResponse.data || []
+        const boutiquesData: MapBoutique[] = boutiquesResponse.data || []
+      
+        // Associate product images with boutiques
+        const boutiquesWithImages = boutiquesData.map(boutique => {
+          const boutiqueProducts = products.filter(p => p.boutiqueId === boutique.id)
+          const firstProductWithImage = boutiqueProducts.find(p => p.img1 && p.img1 !== '/')
+          const productImage = firstProductWithImage?.img1 
+            ? (firstProductWithImage.img1.startsWith('http') 
+                ? firstProductWithImage.img1 
+                : `https://arlink.online${firstProductWithImage.img1}`)
+            : undefined
+          return { ...boutique, productImage }
+        })
+      
+        setMapBoutiques(boutiquesWithImages)
+      } catch (error) {
+        console.error('Error loading map data:', error)
+      }
     }
-  }
 
   const loadCategories = async () => {
     // Keep using local CATEGORIES with images - don't overwrite with API data
@@ -477,52 +507,52 @@ export default function HomePage() {
         </section>
       </main>
 
-      {/* Featured Boutiques - Admin managed (paid placement) */}
-      <section className="bg-dark-light p-6 border-t border-dark-medium">
-        <h2 className="text-gold font-display text-xl mb-4">Boutiques en Vedette</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {mapBoutiques.slice(0, 6).map((boutique) => {
-            const imageUrl = boutique.subDomain ? FEATURED_BOUTIQUE_IMAGES[boutique.subDomain.toLowerCase()] : null
-            return boutique.subDomain ? (
-              <a
-                key={boutique.id}
-                href={`https://${boutique.subDomain}.arlink.online`}
-                className="card p-4 text-center group hover:border-gold transition"
-              >
-                <div className="w-16 h-16 mx-auto mb-2 rounded-full overflow-hidden bg-dark-medium">
-                  {imageUrl ? (
-                    <img src={imageUrl} alt={boutique.societe} className="w-full h-full object-cover group-hover:scale-110 transition" />
+            {/* Featured Boutiques - Admin managed (paid placement) */}
+            <section className="bg-dark-light p-6 border-t border-dark-medium">
+              <h2 className="text-gold font-display text-xl mb-4">Boutiques en Vedette</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {mapBoutiques.filter(b => b.productImage).slice(0, 6).map((boutique) => {
+                  const imageUrl = boutique.productImage || boutique.image || boutique.logo || (boutique.subDomain ? FEATURED_BOUTIQUE_IMAGES[boutique.subDomain.toLowerCase()] : null)
+                  return boutique.subDomain ? (
+                    <a
+                      key={boutique.id}
+                      href={`https://${boutique.subDomain}.arlink.online`}
+                      className="card p-4 text-center group hover:border-gold transition"
+                    >
+                      <div className="w-16 h-16 mx-auto mb-2 rounded-full overflow-hidden bg-dark-medium">
+                        {imageUrl ? (
+                          <img src={imageUrl} alt={boutique.societe} className="w-full h-full object-cover group-hover:scale-110 transition" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <span className="text-2xl">🏪</span>
+                          </div>
+                        )}
+                      </div>
+                      <h3 className="text-cream font-medium text-sm truncate">{boutique.societe}</h3>
+                      <p className="text-gray-500 text-xs">{boutique.ville}</p>
+                    </a>
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <span className="text-2xl">🏪</span>
-                    </div>
-                  )}
-                </div>
-                <h3 className="text-cream font-medium text-sm truncate">{boutique.societe}</h3>
-                <p className="text-gray-500 text-xs">{boutique.ville}</p>
-              </a>
-            ) : (
-              <Link
-                key={boutique.id}
-                to={`/boutique/${boutique.id}`}
-                className="card p-4 text-center group hover:border-gold transition"
-              >
-                <div className="w-16 h-16 mx-auto mb-2 rounded-full overflow-hidden bg-dark-medium">
-                  {imageUrl ? (
-                    <img src={imageUrl} alt={boutique.societe} className="w-full h-full object-cover group-hover:scale-110 transition" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <span className="text-2xl">🏪</span>
-                    </div>
-                  )}
-                </div>
-                <h3 className="text-cream font-medium text-sm truncate">{boutique.societe}</h3>
-                <p className="text-gray-500 text-xs">{boutique.ville}</p>
-              </Link>
-            )
-          })}
-        </div>
-      </section>
+                    <Link
+                      key={boutique.id}
+                      to={`/boutique/${boutique.id}`}
+                      className="card p-4 text-center group hover:border-gold transition"
+                    >
+                      <div className="w-16 h-16 mx-auto mb-2 rounded-full overflow-hidden bg-dark-medium">
+                        {imageUrl ? (
+                          <img src={imageUrl} alt={boutique.societe} className="w-full h-full object-cover group-hover:scale-110 transition" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <span className="text-2xl">🏪</span>
+                          </div>
+                        )}
+                      </div>
+                      <h3 className="text-cream font-medium text-sm truncate">{boutique.societe}</h3>
+                      <p className="text-gray-500 text-xs">{boutique.ville}</p>
+                    </Link>
+                  )
+                })}
+              </div>
+            </section>
 
       {/* Footer */}
       <footer className="bg-dark border-t border-dark-medium px-6 py-6">

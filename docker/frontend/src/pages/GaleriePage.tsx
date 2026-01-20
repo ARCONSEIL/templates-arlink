@@ -1,7 +1,17 @@
 import { useState, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react'
-import { boutiquesService } from '../services/api'
+import { boutiquesService, productsService } from '../services/api'
+
+interface Product {
+  id: string
+  nom: string
+  boutiqueId: string
+  img1?: string
+  img2?: string
+  img3?: string
+  prix?: number
+}
 
 interface Boutique {
   id: string
@@ -14,6 +24,7 @@ interface Boutique {
   image?: string
   subDomain?: string
   vues?: number
+  productImage?: string
 }
 
 const categories = [
@@ -54,17 +65,36 @@ export default function GaleriePage() {
     loadBoutiques()
   }, [])
 
-  const loadBoutiques = async () => {
-    setIsLoading(true)
-    try {
-      const response = await boutiquesService.getAll({ status: 'active' })
-      setBoutiques(response.data)
-    } catch (error) {
-      console.error('Error loading boutiques:', error)
-    } finally {
-      setIsLoading(false)
+    const loadBoutiques = async () => {
+      setIsLoading(true)
+      try {
+        const [boutiquesResponse, productsResponse] = await Promise.all([
+          boutiquesService.getAll({ status: 'active' }),
+          productsService.getAll()
+        ])
+      
+        const products: Product[] = productsResponse.data || []
+        const boutiquesData: Boutique[] = boutiquesResponse.data || []
+      
+        // Associate product images with boutiques
+        const boutiquesWithImages = boutiquesData.map(boutique => {
+          const boutiqueProducts = products.filter(p => p.boutiqueId === boutique.id)
+          const firstProductWithImage = boutiqueProducts.find(p => p.img1 && p.img1 !== '/')
+          const productImage = firstProductWithImage?.img1 
+            ? (firstProductWithImage.img1.startsWith('http') 
+                ? firstProductWithImage.img1 
+                : `https://arlink.online${firstProductWithImage.img1}`)
+            : undefined
+          return { ...boutique, productImage }
+        })
+      
+        setBoutiques(boutiquesWithImages)
+      } catch (error) {
+        console.error('Error loading boutiques:', error)
+      } finally {
+        setIsLoading(false)
+      }
     }
-  }
 
   const currentCategory = categories[currentCategoryIndex]
   
@@ -141,25 +171,42 @@ export default function GaleriePage() {
             😔 Aucune boutique dans cette catégorie pour le moment
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
-            {filteredBoutiques.map((boutique) => (
-              <div
-                key={boutique.id}
-                onClick={() => openBoutique(boutique)}
-                className="bg-gradient-to-br from-[#1a1a1a] to-[#2d2d2d] border-2 border-[#c9a961] rounded-[15px] px-5 py-10 text-center cursor-pointer transition-all duration-300 hover:-translate-y-2.5 hover:shadow-[0_15px_50px_rgba(201,169,97,0.4)] hover:border-[#d4b270]"
-                style={{ boxShadow: '0 8px 30px rgba(0,0,0,0.5)' }}
-              >
-                <div className="text-[80px] mb-5">{currentCategory.icon}</div>
-                <div className="text-[22px] font-bold text-[#c9a961] mb-3">
-                  {boutique.societe || 'Boutique ARLinK'}
-                </div>
-                <div className="text-base text-[#aaaaaa] flex items-center justify-center gap-2">
-                  <MapPin className="w-4 h-4 text-[#c9a961]" />
-                  <span>{boutique.ville || 'Ville'}, {boutique.pays || 'Pays'}</span>
-                </div>
-              </div>
-            ))}
-          </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
+                      {filteredBoutiques.map((boutique) => (
+                        <div
+                          key={boutique.id}
+                          onClick={() => openBoutique(boutique)}
+                          className="bg-gradient-to-br from-[#1a1a1a] to-[#2d2d2d] border-2 border-[#c9a961] rounded-[15px] overflow-hidden text-center cursor-pointer transition-all duration-300 hover:-translate-y-2.5 hover:shadow-[0_15px_50px_rgba(201,169,97,0.4)] hover:border-[#d4b270]"
+                          style={{ boxShadow: '0 8px 30px rgba(0,0,0,0.5)' }}
+                        >
+                          {boutique.productImage || boutique.image || boutique.logo ? (
+                            <div className="h-[180px] w-full overflow-hidden">
+                              <img 
+                                src={boutique.productImage || boutique.image || boutique.logo} 
+                                alt={boutique.societe}
+                                className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement
+                                  target.style.display = 'none'
+                                  target.parentElement!.innerHTML = `<div class="h-full flex items-center justify-center text-[80px]">${currentCategory.icon}</div>`
+                                }}
+                              />
+                            </div>
+                          ) : (
+                            <div className="h-[180px] flex items-center justify-center text-[80px]">{currentCategory.icon}</div>
+                          )}
+                          <div className="p-5">
+                            <div className="text-[22px] font-bold text-[#c9a961] mb-3">
+                              {boutique.societe || 'Boutique ARLinK'}
+                            </div>
+                            <div className="text-base text-[#aaaaaa] flex items-center justify-center gap-2">
+                              <MapPin className="w-4 h-4 text-[#c9a961]" />
+                              <span>{boutique.ville || 'Ville'}, {boutique.pays || 'Pays'}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
         )}
       </div>
     </div>
