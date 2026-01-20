@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import HomePage from './pages/HomePage'
 import GaleriePage from './pages/GaleriePage'
 import BoutiquePage from './pages/BoutiquePage'
@@ -6,7 +6,8 @@ import CartPage from './pages/CartPage'
 import DashboardPage from './pages/DashboardPage'
 import DashboardArtisanPage from './pages/DashboardArtisanPage'
 import DashboardClientPage from './pages/DashboardClientPage'
-import LoginPage from './pages/LoginPage'
+import AdminDashboardPage from './pages/AdminDashboardPage'
+import SuperAdminDashboardPage from './pages/SuperAdminDashboardPage'
 import RegisterPage from './pages/RegisterPage'
 
 // Check if we're on a subdomain (e.g., darnhas.arlink.online)
@@ -36,10 +37,12 @@ function App() {
       <Route path="/boutique/:id" element={<BoutiquePage />} />
       <Route path="/panier" element={<CartPage />} />
       <Route path="/dashboard" element={<DashboardPage />} />
-      <Route path="/dashboard/artisan" element={<DashboardArtisanPage />} />
-      <Route path="/dashboard/client" element={<DashboardClientPage />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
+            <Route path="/dashboard/artisan" element={<DashboardArtisanPage />} />
+            <Route path="/dashboard/client" element={<DashboardClientPage />} />
+            <Route path="/admin" element={<AdminDashboardPage />} />
+            <Route path="/super-admin" element={<SuperAdminDashboardPage />} />
+            <Route path="/login" element={<Navigate to="/" replace />} />
+            <Route path="/register" element={<RegisterPage />} />
     </Routes>
   )
 }

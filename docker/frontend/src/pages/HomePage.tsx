@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet'
 import { ChevronLeft, ChevronRight, Search, User, Menu } from 'lucide-react'
 import { boutiquesService, categoriesService } from '../services/api'
@@ -63,6 +63,7 @@ const FEATURED_BOUTIQUE_IMAGES: Record<string, string> = {
 
 
 export default function HomePage() {
+  const navigate = useNavigate()
   const [mapBoutiques, setMapBoutiques] = useState<MapBoutique[]>([])
   const [categories] = useState(CATEGORIES)
   const [carouselIndex, setCarouselIndex] = useState(0)
@@ -112,6 +113,13 @@ export default function HomePage() {
 
   const visibleCategories = categories.slice(carouselIndex * 5, carouselIndex * 5 + 5)
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      navigate(`/galerie?search=${encodeURIComponent(searchQuery.trim())}`)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-dark flex flex-col">
       {/* Header */}
@@ -124,18 +132,18 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="flex-1 max-w-xl mx-8">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Rechercher un artisan, une boutique..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-dark border border-dark-medium rounded-lg px-4 py-2 pl-10 text-cream placeholder-gray-500 focus:border-gold focus:outline-none"
-              />
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" />
-            </div>
-          </div>
+                    <form onSubmit={handleSearch} className="flex-1 max-w-xl mx-8">
+                      <div className="relative">
+                        <input
+                          type="text"
+                          placeholder="Rechercher un artisan, une boutique..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="w-full bg-dark border border-dark-medium rounded-lg px-4 py-2 pl-10 text-cream placeholder-gray-500 focus:border-gold focus:outline-none"
+                        />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4 cursor-pointer" onClick={handleSearch} />
+                      </div>
+                    </form>
 
           <div className="flex items-center gap-4">
             {user ? (
@@ -317,6 +325,7 @@ export default function HomePage() {
                     try {
                       await login(loginEmail, loginPassword)
                       setShowLoginSidebar(false)
+                      navigate('/dashboard')
                     } catch (err) {
                       console.error('Login error:', err)
                     }
@@ -358,7 +367,11 @@ export default function HomePage() {
                       <div className="flex-1 h-px bg-gold" />
                     </div>
 
-                    <button type="button" className="w-full bg-[#2a2a2a] border border-gold text-cream py-3 rounded-md font-medium hover:bg-[#3a3a3a] transition flex items-center justify-center gap-3">
+                    <button 
+                      type="button" 
+                      onClick={() => window.location.href = 'https://arlink.online/api/auth/google'}
+                      className="w-full bg-[#2a2a2a] border border-gold text-cream py-3 rounded-md font-medium hover:bg-[#3a3a3a] transition flex items-center justify-center gap-3"
+                    >
                       <svg className="w-5 h-5" viewBox="0 0 24 24">
                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                         <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -384,6 +397,7 @@ export default function HomePage() {
                         type: 'artisan'
                       })
                       setShowLoginSidebar(false)
+                      navigate('/dashboard')
                     } catch (err) {
                       console.error('Register error:', err)
                     }
@@ -442,7 +456,11 @@ export default function HomePage() {
                       <div className="flex-1 h-px bg-gold" />
                     </div>
 
-                    <button type="button" className="w-full bg-[#2a2a2a] border border-gold text-cream py-3 rounded-md font-medium hover:bg-[#3a3a3a] transition flex items-center justify-center gap-3">
+                    <button 
+                      type="button" 
+                      onClick={() => window.location.href = 'https://arlink.online/api/auth/google'}
+                      className="w-full bg-[#2a2a2a] border border-gold text-cream py-3 rounded-md font-medium hover:bg-[#3a3a3a] transition flex items-center justify-center gap-3"
+                    >
                       <svg className="w-5 h-5" viewBox="0 0 24 24">
                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                         <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>

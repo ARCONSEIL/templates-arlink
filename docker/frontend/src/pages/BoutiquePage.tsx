@@ -78,6 +78,7 @@ export default function BoutiquePage({ subdomain }: BoutiquePageProps) {
   const [reviews, setReviews] = useState<Review[]>([])
   const [newReview, setNewReview] = useState({ name: '', rating: 5, text: '' })
   const [isFavorite, setIsFavorite] = useState(false)
+  const [selectedImage, setSelectedImage] = useState<string>('')
 
   useEffect(() => {
     const savedCart = localStorage.getItem('arlink_cart')
@@ -288,7 +289,7 @@ export default function BoutiquePage({ subdomain }: BoutiquePageProps) {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredProducts.map((product) => (
-                <div key={product.id} onClick={() => { setSelectedProduct(product); setQuantity(1); setSelectedColor(product.colors?.[0] || ''); setView('product'); }} className="bg-[#0f0f0f] border border-[#1f1f1f] rounded-3xl overflow-hidden cursor-pointer transition hover:border-[#BFA26A] hover:-translate-y-1">
+                <div key={product.id} onClick={() => { setSelectedProduct(product); setQuantity(1); setSelectedColor(product.colors?.[0] || ''); setSelectedImage(product.img1 || ''); setView('product'); }} className="bg-[#0f0f0f] border border-[#1f1f1f] rounded-3xl overflow-hidden cursor-pointer transition hover:border-[#BFA26A] hover:-translate-y-1">
                   <div className="h-48 bg-[#141414] relative">
                     {product.img1 ? <img src={product.img1} alt={product.nom} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-4xl">📦</div>}
                     {product.stock && product.stock < 5 && <span className="absolute top-3 right-3 px-2 py-1 bg-[#EF4444]/20 border border-[#EF4444]/40 rounded-full text-xs text-[#EDE6D2]">Stock limite</span>}
@@ -323,13 +324,13 @@ export default function BoutiquePage({ subdomain }: BoutiquePageProps) {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div className="bg-[#0f0f0f] border border-[#1f1f1f] rounded-3xl overflow-hidden shadow-xl">
-                      <div className="h-[520px] bg-[#141414]"><img src={selectedProduct.img1} alt={selectedProduct.nom} className="w-full h-full object-cover" /></div>
+                      <div className="h-[520px] bg-[#141414]"><img src={selectedImage || selectedProduct.img1} alt={selectedProduct.nom} className="w-full h-full object-cover" /></div>
                     </div>
-                    <div className="grid grid-cols-4 gap-3">
-                      {[selectedProduct.img1, selectedProduct.img2, selectedProduct.img3, selectedProduct.img4].filter(Boolean).map((img, i) => (
-                        <div key={i} className="h-20 bg-[#0f0f0f] border border-[#1f1f1f] rounded-xl overflow-hidden cursor-pointer hover:border-[#BFA26A]"><img src={img} alt="" className="w-full h-full object-cover" /></div>
-                      ))}
-                    </div>
+                                        <div className="grid grid-cols-4 gap-3">
+                                          {[selectedProduct.img1, selectedProduct.img2, selectedProduct.img3, selectedProduct.img4].filter(Boolean).map((img, i) => (
+                                            <div key={i} onClick={() => setSelectedImage(img as string)} className={`h-20 bg-[#0f0f0f] border rounded-xl overflow-hidden cursor-pointer transition ${(selectedImage || selectedProduct.img1) === img ? 'border-[#BFA26A]' : 'border-[#1f1f1f] hover:border-[#BFA26A]'}`}><img src={img} alt="" className="w-full h-full object-cover" /></div>
+                                          ))}
+                                        </div>
                   </div>
 
                   <div>

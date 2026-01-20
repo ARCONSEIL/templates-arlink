@@ -26,12 +26,15 @@ export default function DashboardArtisanPage() {
     { id: '2', nom: 'Bracelet Touareg', description: 'Bracelet en cuir et argent', prix: 45, stock: 8, category: 'Bijoux', img: 'https://static01.nyt.com/images/2024/12/06/multimedia/06sp-jewelry-atlas-inyt-01-ljtb/29sp-jewelry-atlas-inyt-01-ljtb-videoSixteenByNineJumbo1600.jpg' },
   ])
   const [socialNetworks, setSocialNetworks] = useState<SocialNetwork[]>([
-    { name: 'Facebook', url: '', enabled: false },
     { name: 'Instagram', url: '', enabled: false },
     { name: 'TikTok', url: '', enabled: false },
     { name: 'YouTube', url: '', enabled: false },
-    { name: 'LinkedIn', url: '', enabled: false },
+    { name: 'Facebook', url: '', enabled: false },
+    { name: 'Pinterest', url: '', enabled: false },
+    { name: 'Google Business', url: '', enabled: false },
     { name: 'WhatsApp', url: '', enabled: false },
+    { name: 'Site Web', url: '', enabled: false },
+    { name: 'Email Pro', url: '', enabled: false },
   ])
     const [newProduct, setNewProduct] = useState({ nom: '', description: '', prix: 0, stock: 0, category: '' })
     const [shopInfo, setShopInfo] = useState({
@@ -70,13 +73,7 @@ export default function DashboardArtisanPage() {
     setProducts(products.filter(p => p.id !== id))
   }
 
-  const toggleSocialNetwork = (index: number) => {
-    const updated = [...socialNetworks]
-    updated[index].enabled = !updated[index].enabled
-    setSocialNetworks(updated)
-  }
-
-  const updateSocialUrl = (index: number, url: string) => {
+  const updateSocialUrl= (index: number, url: string) => {
     const updated = [...socialNetworks]
     updated[index].url = url
     setSocialNetworks(updated)
@@ -302,24 +299,49 @@ export default function DashboardArtisanPage() {
           {/* SOCIAL NETWORKS */}
           {activeSection === 'social' && (
             <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-[#EDE6D2]">Reseaux sociaux</h2>
-              <p className="text-[#CFC6AE]">Connectez vos reseaux sociaux pour partager automatiquement vos produits</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {socialNetworks.map((network, index) => (
-                  <div key={network.name} className="rounded-3xl border border-[#232a33] bg-[#14181d] p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-[#EDE6D2]">Reseaux (video + photo + trafic)</h2>
+                  <p className="text-[#CFC6AE] mt-1">Mets tout. Plus tu remplis, plus tu gagnes des vues (Reels, Shorts, videos, photos).</p>
+                </div>
+                <button className="px-4 py-2 bg-[#3B82F6] text-white font-bold rounded-xl hover:brightness-95 transition">Auto remplir (IA)</button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[
+                  { name: 'Instagram', icon: '📷', hint: 'Reels + Photos', placeholder: 'https://instagram.com/...' },
+                  { name: 'TikTok', icon: '🎥', hint: 'Shorts viraux', placeholder: 'https://tiktok.com/@...' },
+                  { name: 'YouTube', icon: '▶️', hint: 'Videos longues', placeholder: 'https://youtube.com/@...' },
+                  { name: 'Facebook', icon: '📘', hint: 'Page pro', placeholder: 'https://facebook.com/...' },
+                  { name: 'Pinterest', icon: '📌', hint: 'Inspirations', placeholder: 'https://pinterest.com/...' },
+                  { name: 'Google Business', icon: '📍', hint: 'Fiche locale', placeholder: 'https://g.page/...' },
+                  { name: 'WhatsApp', icon: '💬', hint: 'Contact direct', placeholder: '+1 555...' },
+                  { name: 'Site Web', icon: '🌐', hint: 'Reference', placeholder: 'https://...' },
+                  { name: 'Email Pro', icon: '✉️', hint: 'Contact', placeholder: 'contact@...' },
+                ].map((network, index) => (
+                  <div key={network.name} className="rounded-2xl border border-[#2d3743] bg-[#0f1318] p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <span className="font-semibold">{network.name}</span>
-                      <button onClick={() => toggleSocialNetwork(index)} className={`w-12 h-6 rounded-full transition ${network.enabled ? 'bg-[#22C55E]' : 'bg-[#232a33]'}`}>
-                        <div className={`w-5 h-5 rounded-full bg-white transition transform ${network.enabled ? 'translate-x-6' : 'translate-x-0.5'}`} />
-                      </button>
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-[#10161d] border border-[#2d3743] flex items-center justify-center text-lg">{network.icon}</div>
+                        <div>
+                          <div className="font-semibold text-[#EDE6D2]">{network.name}</div>
+                          <div className="text-xs text-[#CFC6AE]">{network.hint}</div>
+                        </div>
+                      </div>
+                      <span className="px-2 py-1 text-xs rounded-full border border-[#3B82F6]/35 bg-[#3B82F6]/14 text-[#EDE6D2]">+vues</span>
                     </div>
-                    {network.enabled && (
-                      <input value={network.url} onChange={(e) => updateSocialUrl(index, e.target.value)} placeholder={`URL ${network.name}`} className="w-full bg-[#0d0f12] border border-[#232a33] rounded-xl px-4 py-2 outline-none focus:border-[#BFA26A] text-[#EDE6D2] text-sm" />
-                    )}
+                    <input 
+                      value={socialNetworks[index]?.url || ''} 
+                      onChange={(e) => updateSocialUrl(index, e.target.value)} 
+                      placeholder={network.placeholder} 
+                      className="w-full bg-[#0f1318] border border-[#2d3743] rounded-xl px-3 py-2 outline-none focus:border-[#3B82F6] focus:ring-2 focus:ring-[#3B82F6]/15 text-[#EDE6D2] text-sm transition" 
+                    />
                   </div>
                 ))}
               </div>
-              <button className="px-6 py-3 bg-[#BFA26A] text-black font-bold rounded-xl hover:brightness-95 transition">Sauvegarder</button>
+              <div className="flex gap-3">
+                <button className="px-6 py-3 bg-[#BFA26A] text-black font-bold rounded-xl hover:brightness-95 transition">Appliquer au cadre boutique</button>
+                <button className="px-6 py-3 bg-[#14181d] border border-[#2d3743] text-[#EDE6D2] font-bold rounded-xl hover:border-[#BFA26A] transition">Copier tous les liens</button>
+              </div>
             </div>
           )}
 

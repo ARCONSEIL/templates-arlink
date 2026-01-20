@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { 
   Store, 
   Package, 
@@ -43,7 +43,8 @@ interface Stats {
 
 export default function DashboardPage() {
   const navigate = useNavigate()
-  const { user, logout, checkAuth } = useAuthStore()
+  const [searchParams] = useSearchParams()
+  const { user, logout, checkAuth, setToken } = useAuthStore()
   const [activeTab, setActiveTab] = useState('articles')
   const [boutiques, setBoutiques] = useState<Boutique[]>([])
   const [products, setProducts] = useState<Product[]>([])
@@ -51,15 +52,22 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    const tokenFromUrl = searchParams.get('token')
+    if (tokenFromUrl) {
+      setToken(tokenFromUrl)
+      navigate('/dashboard', { replace: true })
+    }
     checkAuth()
   }, [])
 
   useEffect(() => {
-    if (!user) {
-      navigate('/login')
+    if (!user && !searchParams.get('token')) {
+      navigate('/')
       return
     }
-    loadData()
+    if (user) {
+      loadData()
+    }
   }, [user])
 
   const loadData = async () => {

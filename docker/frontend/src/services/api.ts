@@ -23,6 +23,8 @@ export const authService = {
   register: (data: { email: string; password: string; nom?: string; prenom?: string; type?: string }) =>
     api.post('/auth/register', data),
   getProfile: () => api.get('/auth/me'),
+  loginWithGoogle: (data: { email: string; nom?: string; prenom?: string; googleId: string }) =>
+    api.post('/auth/google', data),
 }
 
 export const boutiquesService = {

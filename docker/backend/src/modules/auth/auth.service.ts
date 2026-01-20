@@ -63,4 +63,25 @@ export class AuthService {
       throw new UnauthorizedException('Invalid token');
     }
   }
+
+  async loginWithGoogle(data: {
+    email: string;
+    nom?: string;
+    prenom?: string;
+    googleId: string;
+  }) {
+    let user = await this.usersService.findByEmail(data.email);
+    
+    if (!user) {
+      user = await this.usersService.create({
+        email: data.email,
+        password: `google_${data.googleId}_${Date.now()}`,
+        nom: data.nom,
+        prenom: data.prenom,
+        type: UserType.CLIENT,
+      });
+    }
+
+    return this.login(user);
+  }
 }
