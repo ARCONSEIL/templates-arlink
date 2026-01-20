@@ -25,6 +25,7 @@ interface Boutique {
   subDomain?: string
   vues?: number
   productImage?: string
+  matchingProducts?: Product[]
 }
 
 const categories = [
@@ -53,17 +54,26 @@ const categories = [
 export default function GaleriePage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [boutiques, setBoutiques] = useState<Boutique[]>([])
+  const [, setAllProducts] = useState<Product[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [isSearchMode, setIsSearchMode] = useState(false)
 
   useEffect(() => {
     const cat = searchParams.get('cat')
-    if (cat) {
+    const search = searchParams.get('search')
+    
+    if (search) {
+      setSearchQuery(search)
+      setIsSearchMode(true)
+    } else if (cat) {
       const index = categories.findIndex(c => c.key === cat)
       if (index !== -1) setCurrentCategoryIndex(index)
+      setIsSearchMode(false)
     }
     loadBoutiques()
-  }, [])
+  }, [searchParams])
 
     const loadBoutiques = async () => {
       setIsLoading(true)
@@ -75,6 +85,8 @@ export default function GaleriePage() {
       
         const products: Product[] = productsResponse.data || []
         const boutiquesData: Boutique[] = boutiquesResponse.data || []
+        
+        setAllProducts(products)
       
         // Associate product images with boutiques
         const boutiquesWithImages = boutiquesData.map(boutique => {
@@ -85,7 +97,7 @@ export default function GaleriePage() {
                 ? firstProductWithImage.img1 
                 : `https://arlink.online${firstProductWithImage.img1}`)
             : undefined
-          return { ...boutique, productImage }
+          return { ...boutique, productImage, matchingProducts: boutiqueProducts }
         })
       
         setBoutiques(boutiquesWithImages)
@@ -98,12 +110,26 @@ export default function GaleriePage() {
 
   const currentCategory = categories[currentCategoryIndex]
   
-  const filteredBoutiques = boutiques.filter(b => 
-    currentCategory.dbNames.some(dbName => 
-      b.categorie === dbName || 
-      b.categorie?.toLowerCase() === dbName.toLowerCase()
-    )
-  )
+  // Filter boutiques based on search mode or category mode
+  const filteredBoutiques = isSearchMode 
+    ? boutiques.filter(b => {
+        const query = searchQuery.toLowerCase()
+        // Search in boutique name
+        const matchesBoutique = b.societe?.toLowerCase().includes(query) ||
+          b.description?.toLowerCase().includes(query) ||
+          b.ville?.toLowerCase().includes(query)
+        // Search in products
+        const matchesProducts = b.matchingProducts?.some(p => 
+          p.nom?.toLowerCase().includes(query)
+        )
+        return matchesBoutique || matchesProducts
+      })
+    : boutiques.filter(b => 
+        currentCategory.dbNames.some(dbName => 
+          b.categorie === dbName || 
+          b.categorie?.toLowerCase() === dbName.toLowerCase()
+        )
+      )
 
   const prevCategory = () => {
     const newIndex = (currentCategoryIndex - 1 + categories.length) % categories.length
@@ -131,7 +157,9 @@ export default function GaleriePage() {
       <div 
         className="h-[400px] flex items-center justify-center relative transition-all duration-500"
         style={{
-          background: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('${currentCategory.image}') center/cover`
+          background: isSearchMode 
+            ? `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url('https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=1200') center/cover`
+            : `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('${currentCategory.image}') center/cover`
         }}
       >
         <Link 
@@ -141,24 +169,37 @@ export default function GaleriePage() {
           ← Retour
         </Link>
         <div className="text-[64px] font-bold text-white flex items-center gap-5" style={{ textShadow: '0 4px 20px rgba(0,0,0,0.8)' }}>
-          <span>{currentCategory.icon}</span>
-          <span>{currentCategory.name}</span>
+          {isSearchMode ? (
+            <>
+              <span>🔍</span>
+              <span>Résultats pour "{searchQuery}"</span>
+            </>
+          ) : (
+            <>
+              <span>{currentCategory.icon}</span>
+              <span>{currentCategory.name}</span>
+            </>
+          )}
         </div>
       </div>
 
-      {/* Fixed navigation arrows */}
-      <button 
-        onClick={prevCategory}
-        className="fixed top-1/2 left-5 -translate-y-1/2 w-[50px] h-[50px] bg-[rgba(201,169,97,0.9)] rounded-full flex items-center justify-center text-2xl text-[#0a0a0a] cursor-pointer transition-all duration-300 z-50 hover:bg-[#c9a961] hover:scale-110"
-      >
-        <ChevronLeft className="w-6 h-6" />
-      </button>
-      <button 
-        onClick={nextCategory}
-        className="fixed top-1/2 right-5 -translate-y-1/2 w-[50px] h-[50px] bg-[rgba(201,169,97,0.9)] rounded-full flex items-center justify-center text-2xl text-[#0a0a0a] cursor-pointer transition-all duration-300 z-50 hover:bg-[#c9a961] hover:scale-110"
-      >
-        <ChevronRight className="w-6 h-6" />
-      </button>
+      {/* Fixed navigation arrows - hidden in search mode */}
+      {!isSearchMode && (
+        <>
+          <button 
+            onClick={prevCategory}
+            className="fixed top-1/2 left-5 -translate-y-1/2 w-[50px] h-[50px] bg-[rgba(201,169,97,0.9)] rounded-full flex items-center justify-center text-2xl text-[#0a0a0a] cursor-pointer transition-all duration-300 z-50 hover:bg-[#c9a961] hover:scale-110"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+          <button 
+            onClick={nextCategory}
+            className="fixed top-1/2 right-5 -translate-y-1/2 w-[50px] h-[50px] bg-[rgba(201,169,97,0.9)] rounded-full flex items-center justify-center text-2xl text-[#0a0a0a] cursor-pointer transition-all duration-300 z-50 hover:bg-[#c9a961] hover:scale-110"
+          >
+            <ChevronRight className="w-6 h-6" />
+          </button>
+        </>
+      )}
 
       {/* Boutiques grid */}
       <div className="max-w-[1400px] mx-auto px-10 py-[60px]">
@@ -168,7 +209,10 @@ export default function GaleriePage() {
           </div>
         ) : filteredBoutiques.length === 0 ? (
           <div className="text-center py-[100px] text-[#888] text-xl">
-            😔 Aucune boutique dans cette catégorie pour le moment
+            {isSearchMode 
+              ? `😔 Aucun résultat pour "${searchQuery}"`
+              : '😔 Aucune boutique dans cette catégorie pour le moment'
+            }
           </div>
         ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
