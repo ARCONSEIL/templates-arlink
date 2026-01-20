@@ -6,17 +6,19 @@ import { boutiquesService, productsService } from '../services/api'
 
 interface Artisan {
   id: string
-  nom: string
-  prenom: string
+  societe: string
+  subDomain: string
   email: string
   telephone: string
   ville: string
   pays: string
+  latitude: string
+  longitude: string
+  categorie: string
   plan: 'BASIQUE' | 'STANDARD' | 'PREMIUM'
   nbArticles: number
   status: 'ACTIF' | 'SUSPENDU'
-  dateInscription: string
-  derniereConnexion: string
+  selected: boolean
 }
 
 interface Boutique {
@@ -62,13 +64,7 @@ interface TicketSupport {
   priority: 'BASSE' | 'NORMALE' | 'HAUTE' | 'URGENTE'
 }
 
-const sampleArtisans: Artisan[] = [
-  { id: '1', nom: 'Benali', prenom: 'Ahmed', email: 'ahmed@example.com', telephone: '+212 6 12 34 56 78', ville: 'Casablanca', pays: 'Maroc', plan: 'PREMIUM', nbArticles: 45, status: 'ACTIF', dateInscription: '2025-06-15', derniereConnexion: '2026-01-20' },
-  { id: '2', nom: 'Dupont', prenom: 'Marie', email: 'marie@example.com', telephone: '+33 6 98 76 54 32', ville: 'Paris', pays: 'France', plan: 'STANDARD', nbArticles: 28, status: 'ACTIF', dateInscription: '2025-08-20', derniereConnexion: '2026-01-19' },
-  { id: '3', nom: 'Alami', prenom: 'Fatima', email: 'fatima@example.com', telephone: '+212 6 55 44 33 22', ville: 'Fes', pays: 'Maroc', plan: 'BASIQUE', nbArticles: 12, status: 'SUSPENDU', dateInscription: '2025-10-01', derniereConnexion: '2026-01-10' },
-  { id: '4', nom: 'Toure', prenom: 'Amadou', email: 'amadou@example.com', telephone: '+225 07 12 34 56', ville: 'Abidjan', pays: 'Cote Ivoire', plan: 'STANDARD', nbArticles: 18, status: 'ACTIF', dateInscription: '2025-11-15', derniereConnexion: '2026-01-18' },
-  { id: '5', nom: 'Ndiaye', prenom: 'Aissatou', email: 'aissatou@example.com', telephone: '+221 77 123 45 67', ville: 'Dakar', pays: 'Senegal', plan: 'PREMIUM', nbArticles: 35, status: 'ACTIF', dateInscription: '2025-07-01', derniereConnexion: '2026-01-20' },
-]
+const sampleArtisans: Artisan[] = []
 
 const sampleBoutiques: Boutique[] = [
   { id: '1', nom: 'Dar Lakbira', slug: 'darlakbira', category: 'Artisanat', status: 'ACTIVE', artisanNom: 'Ahmed Benali', vedette: true, vedetteType: 'ADMIN', photo: 'https://images.unsplash.com/photo-1530124566582-a618bc2615dc?w=400', hasPhoto: true },
@@ -147,19 +143,22 @@ export default function AdminDashboardPage() {
       setBoutiques(boutiquesData)
       
       const productsData = productsRes.data as Array<Record<string, unknown>>
-      const artisansData = boutiquesData.map((b) => ({
-        id: b.id,
-        nom: b.nom,
-        prenom: '',
-        email: b.slug + '@arlink.online',
+      const rawBoutiques = boutiquesRes.data as Array<Record<string, unknown>>
+      const artisansData = rawBoutiques.map((b) => ({
+        id: b.id as string,
+        societe: b.societe as string || 'Sans nom',
+        subDomain: b.subDomain as string || '',
+        email: (b.subDomain as string || 'contact') + '@arlink.online',
         telephone: '',
-        ville: '',
-        pays: '',
+        ville: b.ville as string || '',
+        pays: b.pays as string || '',
+        latitude: b.latitude as string || '',
+        longitude: b.longitude as string || '',
+        categorie: b.categorie as string || '',
         plan: 'STANDARD' as const,
         nbArticles: productsData.filter((p) => p.boutiqueId === b.id).length,
-        status: b.status === 'ACTIVE' ? 'ACTIF' as const : 'SUSPENDU' as const,
-        dateInscription: '2025-01-01',
-        derniereConnexion: '2026-01-20'
+        status: (b.status as string || 'active') === 'active' ? 'ACTIF' as const : 'SUSPENDU' as const,
+        selected: false
       }))
       setArtisans(artisansData)
       
@@ -206,9 +205,24 @@ export default function AdminDashboardPage() {
   }
 
   const filteredArtisans = artisans.filter(a => 
-    a.nom?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    a.email?.toLowerCase().includes(searchQuery.toLowerCase())
+    a.societe?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    a.subDomain?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    a.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    a.ville?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    a.pays?.toLowerCase().includes(searchQuery.toLowerCase())
   )
+
+  const handleSelectAll = (checked: boolean) => {
+    setArtisans(artisans.map(a => ({ ...a, selected: checked })))
+  }
+
+  const handleSelectArtisan = (id: string, checked: boolean) => {
+    setArtisans(artisans.map(a => a.id === id ? { ...a, selected: checked } : a))
+  }
+
+  const handleDeleteArtisan = (_id: string) => {
+    showNotification('error', 'Suppression non autorisee - contactez le super admin')
+  }
 
   const filteredBoutiques = boutiques.filter(b =>
     b.nom?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -408,64 +422,93 @@ export default function AdminDashboardPage() {
 
           {activeSection === 'crm' && (
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold">CRM Artisans ({filteredArtisans.length})</h2>
-                <p className="text-sm text-[#CFC6AE]">Cochez pour selectionner - cliquez sur le crayon pour editer</p>
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <h2 className="text-2xl font-bold">CRM Boutiques ({filteredArtisans.length})</h2>
+                <p className="text-sm text-[#CFC6AE]">Donnees reelles de la base de donnees - {artisans.filter(a => a.selected).length} selectionne(s)</p>
               </div>
               <div className="rounded-2xl border border-[#1a1a1a] bg-[#0a0c0f] overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-[#14181d]">
+                <table className="w-full text-xs">
+                  <thead className="bg-[#14181d] sticky top-0">
                     <tr className="border-b border-[#1a1a1a]">
-                      <th className="px-3 py-2 text-center"><input type="checkbox" className="w-4 h-4 accent-[#BFA26A]" /></th>
-                      <th className="px-3 py-2 text-left text-xs text-[#CFC6AE] font-medium">Societe</th>
-                      <th className="px-3 py-2 text-left text-xs text-[#CFC6AE] font-medium">Email</th>
-                      <th className="px-3 py-2 text-left text-xs text-[#CFC6AE] font-medium">Plan</th>
-                      <th className="px-3 py-2 text-left text-xs text-[#CFC6AE] font-medium">Articles</th>
-                      <th className="px-3 py-2 text-left text-xs text-[#CFC6AE] font-medium">Statut</th>
-                      <th className="px-3 py-2 text-left text-xs text-[#CFC6AE] font-medium">Actions</th>
+                      <th className="px-2 py-3 text-center w-10"><input type="checkbox" onChange={(e) => handleSelectAll(e.target.checked)} className="w-4 h-4 accent-[#BFA26A]" /></th>
+                      <th className="px-2 py-3 text-left text-[#CFC6AE] font-medium whitespace-nowrap">Societe</th>
+                      <th className="px-2 py-3 text-left text-[#CFC6AE] font-medium whitespace-nowrap">Sous-domaine</th>
+                      <th className="px-2 py-3 text-left text-[#CFC6AE] font-medium whitespace-nowrap">Email</th>
+                      <th className="px-2 py-3 text-left text-[#CFC6AE] font-medium whitespace-nowrap">Mobile</th>
+                      <th className="px-2 py-3 text-left text-[#CFC6AE] font-medium whitespace-nowrap">Ville</th>
+                      <th className="px-2 py-3 text-left text-[#CFC6AE] font-medium whitespace-nowrap">Pays</th>
+                      <th className="px-2 py-3 text-left text-[#CFC6AE] font-medium whitespace-nowrap">GPS</th>
+                      <th className="px-2 py-3 text-left text-[#CFC6AE] font-medium whitespace-nowrap">Categorie</th>
+                      <th className="px-2 py-3 text-left text-[#CFC6AE] font-medium whitespace-nowrap">Articles</th>
+                      <th className="px-2 py-3 text-left text-[#CFC6AE] font-medium whitespace-nowrap">Statut</th>
+                      <th className="px-2 py-3 text-left text-[#CFC6AE] font-medium whitespace-nowrap">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredArtisans.map(artisan => (
-                      <tr key={artisan.id} className="border-b border-[#1a1a1a] hover:bg-[#14181d]/50">
-                        <td className="px-3 py-2 text-center"><input type="checkbox" className="w-4 h-4 accent-[#BFA26A]" /></td>
-                        <td className="px-3 py-2">
+                      <tr key={artisan.id} className={`border-b border-[#1a1a1a] hover:bg-[#14181d]/50 ${artisan.selected ? 'bg-[#BFA26A]/10' : ''}`}>
+                        <td className="px-2 py-2 text-center">
+                          <input type="checkbox" checked={artisan.selected} onChange={(e) => handleSelectArtisan(artisan.id, e.target.checked)} className="w-4 h-4 accent-[#BFA26A]" />
+                        </td>
+                        <td className="px-2 py-2">
                           {editingArtisan === artisan.id ? (
-                            <input value={artisan.nom} onChange={(e) => handleUpdateArtisan(artisan.id, 'nom', e.target.value)} className="bg-[#0d0f12] border border-[#232a33] rounded px-2 py-1 text-xs w-full" />
+                            <input value={artisan.societe} onChange={(e) => handleUpdateArtisan(artisan.id, 'societe', e.target.value)} className="bg-[#0d0f12] border border-[#232a33] rounded px-2 py-1 text-xs w-28" />
                           ) : (
-                            <span className="font-medium">{artisan.nom}</span>
+                            <span className="font-medium text-[#EDE6D2]">{artisan.societe}</span>
                           )}
                         </td>
-                        <td className="px-3 py-2">
+                        <td className="px-2 py-2">
                           {editingArtisan === artisan.id ? (
-                            <input value={artisan.email} onChange={(e) => handleUpdateArtisan(artisan.id, 'email', e.target.value)} className="bg-[#0d0f12] border border-[#232a33] rounded px-2 py-1 text-xs w-full" />
+                            <input value={artisan.subDomain} onChange={(e) => handleUpdateArtisan(artisan.id, 'subDomain', e.target.value)} className="bg-[#0d0f12] border border-[#232a33] rounded px-2 py-1 text-xs w-24" />
+                          ) : (
+                            <a href={`https://${artisan.subDomain}.arlink.online`} target="_blank" rel="noopener noreferrer" className="text-[#3B82F6] hover:underline">{artisan.subDomain}</a>
+                          )}
+                        </td>
+                        <td className="px-2 py-2">
+                          {editingArtisan === artisan.id ? (
+                            <input value={artisan.email} onChange={(e) => handleUpdateArtisan(artisan.id, 'email', e.target.value)} className="bg-[#0d0f12] border border-[#232a33] rounded px-2 py-1 text-xs w-36" />
                           ) : (
                             <span className="text-[#CFC6AE]">{artisan.email}</span>
                           )}
                         </td>
-                        <td className="px-3 py-2">
+                        <td className="px-2 py-2">
                           {editingArtisan === artisan.id ? (
-                            <select value={artisan.plan} onChange={(e) => handleUpdateArtisan(artisan.id, 'plan', e.target.value)} className="bg-[#0d0f12] border border-[#232a33] rounded px-2 py-1 text-xs">
-                              <option value="BASIQUE">BASIQUE</option>
-                              <option value="STANDARD">STANDARD</option>
-                              <option value="PREMIUM">PREMIUM</option>
-                            </select>
+                            <input value={artisan.telephone} onChange={(e) => handleUpdateArtisan(artisan.id, 'telephone', e.target.value)} className="bg-[#0d0f12] border border-[#232a33] rounded px-2 py-1 text-xs w-28" placeholder="+212..." />
                           ) : (
-                            <span className="px-2 py-0.5 text-xs rounded bg-[#3B82F6]/20 text-[#3B82F6]">{artisan.plan}</span>
+                            <span className="text-[#CFC6AE]">{artisan.telephone || '-'}</span>
                           )}
                         </td>
-                        <td className="px-3 py-2 text-center">{artisan.nbArticles}</td>
-                        <td className="px-3 py-2">
+                        <td className="px-2 py-2">
                           {editingArtisan === artisan.id ? (
-                            <select value={artisan.status} onChange={(e) => handleUpdateArtisan(artisan.id, 'status', e.target.value)} className="bg-[#0d0f12] border border-[#232a33] rounded px-2 py-1 text-xs">
-                              <option value="ACTIF">ACTIF</option>
-                              <option value="SUSPENDU">SUSPENDU</option>
-                            </select>
+                            <input value={artisan.ville} onChange={(e) => handleUpdateArtisan(artisan.id, 'ville', e.target.value)} className="bg-[#0d0f12] border border-[#232a33] rounded px-2 py-1 text-xs w-24" />
                           ) : (
-                            <span className={'px-2 py-0.5 text-xs rounded ' + getStatusColor(artisan.status)}>{artisan.status}</span>
+                            <span className="text-[#CFC6AE]">{artisan.ville || '-'}</span>
                           )}
                         </td>
-                        <td className="px-3 py-2">
+                        <td className="px-2 py-2">
+                          {editingArtisan === artisan.id ? (
+                            <input value={artisan.pays} onChange={(e) => handleUpdateArtisan(artisan.id, 'pays', e.target.value)} className="bg-[#0d0f12] border border-[#232a33] rounded px-2 py-1 text-xs w-20" />
+                          ) : (
+                            <span className="text-[#CFC6AE]">{artisan.pays || '-'}</span>
+                          )}
+                        </td>
+                        <td className="px-2 py-2">
+                          {artisan.latitude && artisan.longitude ? (
+                            <a href={`https://www.google.com/maps?q=${artisan.latitude},${artisan.longitude}`} target="_blank" rel="noopener noreferrer" className="text-[#3B82F6] hover:underline text-xs" title={`${artisan.latitude}, ${artisan.longitude}`}>
+                              Voir carte
+                            </a>
+                          ) : (
+                            <span className="text-[#666]">-</span>
+                          )}
+                        </td>
+                        <td className="px-2 py-2">
+                          <span className="px-2 py-0.5 text-xs rounded bg-[#BFA26A]/20 text-[#BFA26A]">{artisan.categorie || '-'}</span>
+                        </td>
+                        <td className="px-2 py-2 text-center font-medium">{artisan.nbArticles}</td>
+                        <td className="px-2 py-2">
+                          <span className={'px-2 py-0.5 text-xs rounded ' + getStatusColor(artisan.status)}>{artisan.status}</span>
+                        </td>
+                        <td className="px-2 py-2">
                           <div className="flex gap-1">
                             {editingArtisan === artisan.id ? (
                               <button onClick={() => handleSaveArtisan()} className="p-1.5 hover:bg-green-500/20 rounded-lg" title="Sauvegarder"><Save className="w-3.5 h-3.5 text-green-500" /></button>
@@ -473,11 +516,11 @@ export default function AdminDashboardPage() {
                               <button onClick={() => setEditingArtisan(artisan.id)} className="p-1.5 hover:bg-[#BFA26A]/20 rounded-lg" title="Modifier"><Edit2 className="w-3.5 h-3.5 text-[#BFA26A]" /></button>
                             )}
                             {artisan.status === 'ACTIF' ? (
-                              <button onClick={() => setSuspendModal({type: 'artisan', id: artisan.id, name: artisan.nom})} className="p-1.5 hover:bg-red-500/20 rounded-lg" title="Desactiver"><UserX className="w-3.5 h-3.5 text-red-500" /></button>
+                              <button onClick={() => setSuspendModal({type: 'artisan', id: artisan.id, name: artisan.societe})} className="p-1.5 hover:bg-red-500/20 rounded-lg" title="Desactiver"><UserX className="w-3.5 h-3.5 text-red-500" /></button>
                             ) : (
                               <button onClick={() => handleActivateArtisan(artisan.id)} className="p-1.5 hover:bg-green-500/20 rounded-lg" title="Activer"><UserCheck className="w-3.5 h-3.5 text-green-500" /></button>
                             )}
-                            <button onClick={() => showNotification('error', 'Suppression non autorisee')} className="p-1.5 hover:bg-red-500/20 rounded-lg" title="Supprimer"><Archive className="w-3.5 h-3.5 text-red-500" /></button>
+                            <button onClick={() => handleDeleteArtisan(artisan.id)} className="p-1.5 hover:bg-red-500/20 rounded-lg" title="Supprimer"><Archive className="w-3.5 h-3.5 text-red-500" /></button>
                           </div>
                         </td>
                       </tr>
@@ -506,7 +549,7 @@ export default function AdminDashboardPage() {
                   <tbody>
                     {artisans.map(artisan => (
                       <tr key={artisan.id} className="border-t border-[#232a33]">
-                        <td className="px-4 py-3">{artisan.prenom} {artisan.nom}</td>
+                        <td className="px-4 py-3">{artisan.societe}</td>
                         <td className="px-4 py-3 text-[#CFC6AE]">{artisan.email}</td>
                         <td className="px-4 py-3"><span className="px-2 py-1 text-xs rounded-full bg-[#BFA26A]/20 text-[#BFA26A]">{artisan.plan}</span></td>
                         <td className="px-4 py-3">{artisan.nbArticles}</td>
@@ -514,7 +557,7 @@ export default function AdminDashboardPage() {
                         <td className="px-4 py-3">
                           <div className="flex gap-1">
                             {artisan.status === 'ACTIF' ? (
-                              <button onClick={() => setSuspendModal({type: 'artisan', id: artisan.id, name: artisan.nom})} className="p-2 hover:bg-red-500/20 rounded-lg"><UserX className="w-4 h-4 text-red-500" /></button>
+                              <button onClick={() => setSuspendModal({type: 'artisan', id: artisan.id, name: artisan.societe})} className="p-2 hover:bg-red-500/20 rounded-lg"><UserX className="w-4 h-4 text-red-500" /></button>
                             ) : (
                               <button onClick={() => handleActivateArtisan(artisan.id)} className="p-2 hover:bg-green-500/20 rounded-lg"><UserCheck className="w-4 h-4 text-green-500" /></button>
                             )}
