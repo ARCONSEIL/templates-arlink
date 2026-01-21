@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Plus, Eye, ChevronLeft, ChevronRight, Search, Bell, Settings, LogOut, Save, Trash2, Upload, Edit2, X, Check, RefreshCw } from 'lucide-react'
 import { useAuthStore } from '../stores/authStore'
-import { productsService, boutiquesService, artisansService, ordersService } from '../services/api'
+import { productsService, boutiquesService, artisansService, ordersService, uploadService } from '../services/api'
 
 interface Product {
   id: string
@@ -274,15 +274,28 @@ export default function DashboardArtisanPage() {
     const files = e.target.files
     if (!files || files.length === 0) return
     setUploadProgress(0)
+    setLoading(true)
     const newImages: string[] = []
-    for (let i = 0; i < files.length; i++) {
-      setUploadProgress(Math.round(((i + 0.5) / files.length) * 100))
-      const url = URL.createObjectURL(files[i])
-      newImages.push(url)
-      setUploadProgress(Math.round(((i + 1) / files.length) * 100))
+    try {
+      for (let i = 0; i < files.length; i++) {
+        setUploadProgress(Math.round(((i + 0.5) / files.length) * 100))
+        const response = await uploadService.uploadImage(files[i], (progress) => {
+          setUploadProgress(Math.round(((i + progress / 100) / files.length) * 100))
+        })
+        if (response.data?.url) {
+          newImages.push(response.data.url)
+        }
+        setUploadProgress(Math.round(((i + 1) / files.length) * 100))
+      }
+      setUploadedImages([...uploadedImages, ...newImages])
+      showNotification('success', `${newImages.length} image(s) uploadee(s)`)
+    } catch (err) {
+      console.error('Upload error:', err)
+      showNotification('error', 'Erreur lors de l\'upload des images')
+    } finally {
+      setLoading(false)
+      setTimeout(() => setUploadProgress(0), 1000)
     }
-    setUploadedImages([...uploadedImages, ...newImages])
-    setTimeout(() => setUploadProgress(0), 1000)
   }
 
   const handleUpdateOrderStatus = async (orderId: string, newStatus: string) => {

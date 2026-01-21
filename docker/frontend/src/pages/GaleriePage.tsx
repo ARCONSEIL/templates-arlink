@@ -11,6 +11,7 @@ interface Product {
   img2?: string
   img3?: string
   prix?: number
+  vedette?: boolean
 }
 
 interface Boutique {
@@ -88,10 +89,13 @@ export default function GaleriePage() {
         
         setAllProducts(products)
       
-        // Associate product images with boutiques
+        // Associate product images with boutiques - prioritize vedette product image
         const boutiquesWithImages = boutiquesData.map(boutique => {
           const boutiqueProducts = products.filter(p => p.boutiqueId === boutique.id)
-          const firstProductWithImage = boutiqueProducts.find(p => p.img1 && p.img1 !== '/')
+          // First try to find the vedette product with an image
+          const vedetteProduct = boutiqueProducts.find(p => p.vedette && p.img1 && p.img1 !== '/' && !p.img1.startsWith('blob:'))
+          // Fallback to first product with a valid image
+          const firstProductWithImage = vedetteProduct || boutiqueProducts.find(p => p.img1 && p.img1 !== '/' && !p.img1.startsWith('blob:'))
           const productImage = firstProductWithImage?.img1 
             ? (firstProductWithImage.img1.startsWith('http') 
                 ? firstProductWithImage.img1 
