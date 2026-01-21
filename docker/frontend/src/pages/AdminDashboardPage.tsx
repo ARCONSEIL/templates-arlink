@@ -255,19 +255,20 @@ export default function AdminDashboardPage() {
     b.slug?.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  const navItems = [
-    { id: 'dashboard', icon: '📊', label: 'Tableau de bord' },
-    { id: 'crm', icon: '📋', label: 'CRM Artisans' },
-    { id: 'whatsapp', icon: '📱', label: 'WhatsApp Categories' },
-    { id: 'vedettes', icon: '⭐', label: 'Boutiques Vedettes' },
-    { id: 'artisans', icon: '👥', label: 'Artisans' },
-    { id: 'boutiques', icon: '🏪', label: 'Boutiques' },
-    { id: 'articles', icon: '📦', label: 'Articles' },
-    { id: 'commandes', icon: '📋', label: 'Commandes' },
-    { id: 'tickets', icon: '🎫', label: 'Support' },
-    { id: 'merge', icon: '🔗', label: 'Fusion comptes' },
-    { id: 'home', icon: '🏠', label: 'Accueil', link: '/' },
-  ]
+    const navItems = [
+      { id: 'dashboard', icon: '📊', label: 'Tableau de bord' },
+      { id: 'crm', icon: '📋', label: 'CRM Artisans' },
+      { id: 'whatsapp', icon: '📱', label: 'WhatsApp Categories' },
+      { id: 'vedettes', icon: '⭐', label: 'Boutiques Vedettes' },
+      { id: 'artisans', icon: '👥', label: 'Artisans' },
+      { id: 'boutiques', icon: '🏪', label: 'Boutiques' },
+      { id: 'articles', icon: '📦', label: 'Articles' },
+      { id: 'commandes', icon: '📋', label: 'Commandes' },
+      { id: 'tickets', icon: '🎫', label: 'Support' },
+      { id: 'merge', icon: '🔗', label: 'Fusion comptes' },
+      { id: 'backup', icon: '💾', label: 'Sauvegarde' },
+      { id: 'home', icon: '🏠', label: 'Accueil', link: '/' },
+    ]
 
   // Fonctions de gestion WhatsApp par categorie
   const handleUpdateCategoryWhatsApp = (id: string, field: string, value: string) => {
@@ -988,11 +989,89 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
             </div>
-          )}
-        </div>
-      </main>
+                )}
 
-      {suspendModal && (
+                {activeSection === 'backup' && (
+                  <div className="space-y-6">
+                    <h2 className="text-2xl font-bold">Sauvegarde & Restauration</h2>
+              
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="rounded-2xl border border-[#232a33] bg-[#14181d] p-6">
+                        <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                          <span className="text-2xl">💾</span> Derniere sauvegarde
+                        </h3>
+                        <div className="space-y-3 text-[#CFC6AE]">
+                          <p><strong>Date:</strong> 21 Janvier 2026 - 01:03</p>
+                          <p><strong>Taille:</strong> 576 MB</p>
+                          <p><strong>Contenu:</strong> Base de donnees + Code source</p>
+                          <p><strong>Emplacement:</strong> /var/www/backups/arlink-v2-20260121.tar.gz</p>
+                        </div>
+                        <div className="mt-4 p-3 bg-green-500/10 border border-green-500/30 rounded-xl">
+                          <p className="text-green-400 text-sm">Sauvegarde automatique active</p>
+                        </div>
+                      </div>
+
+                      <div className="rounded-2xl border border-[#232a33] bg-[#14181d] p-6">
+                        <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                          <span className="text-2xl">🔄</span> Restauration
+                        </h3>
+                        <div className="space-y-4">
+                          <p className="text-[#CFC6AE] text-sm">En cas de panne, contactez le support technique avec les informations suivantes:</p>
+                          <div className="bg-[#0d0f12] p-4 rounded-xl font-mono text-xs text-[#CFC6AE]">
+                            <p>Serveur: 217.154.2.83</p>
+                            <p>Backup: /var/www/backups/arlink-v2-20260121.tar.gz</p>
+                            <p>DB: arlink_v2 (PostgreSQL)</p>
+                          </div>
+                          <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-xl">
+                            <p className="text-yellow-400 text-sm">La restauration necessite un acces SSH au serveur</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-[#232a33] bg-[#14181d] p-6">
+                      <h3 className="text-lg font-bold mb-4">Historique des sauvegardes</h3>
+                      <table className="w-full text-sm">
+                        <thead className="bg-[#0d0f12]">
+                          <tr>
+                            <th className="px-4 py-2 text-left text-[#CFC6AE]">Date</th>
+                            <th className="px-4 py-2 text-left text-[#CFC6AE]">Fichier</th>
+                            <th className="px-4 py-2 text-left text-[#CFC6AE]">Taille</th>
+                            <th className="px-4 py-2 text-left text-[#CFC6AE]">Statut</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr className="border-t border-[#232a33]">
+                            <td className="px-4 py-3">21 Jan 2026 01:03</td>
+                            <td className="px-4 py-3 font-mono text-xs">arlink-v2-20260121.tar.gz</td>
+                            <td className="px-4 py-3">576 MB</td>
+                            <td className="px-4 py-3"><span className="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs">Complet</span></td>
+                          </tr>
+                          <tr className="border-t border-[#232a33]">
+                            <td className="px-4 py-3">29 Dec 2025 17:29</td>
+                            <td className="px-4 py-3 font-mono text-xs">arlink-complete-20251229-172959</td>
+                            <td className="px-4 py-3">4.5 GB</td>
+                            <td className="px-4 py-3"><span className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs">Archive</span></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div className="rounded-2xl border border-red-500/30 bg-red-500/5 p-6">
+                      <h3 className="text-lg font-bold mb-2 text-red-400">Procedure de restauration d'urgence</h3>
+                      <ol className="list-decimal list-inside space-y-2 text-[#CFC6AE] text-sm">
+                        <li>Connectez-vous au serveur via SSH: <code className="bg-[#0d0f12] px-2 py-1 rounded">ssh root@217.154.2.83</code></li>
+                        <li>Arretez les containers: <code className="bg-[#0d0f12] px-2 py-1 rounded">cd /var/www/arlink-prod && docker-compose down</code></li>
+                        <li>Restaurez la base de donnees: <code className="bg-[#0d0f12] px-2 py-1 rounded">docker exec -i arlink-postgres psql -U arlink arlink_v2 &lt; backup/database.sql</code></li>
+                        <li>Redemarrez les containers: <code className="bg-[#0d0f12] px-2 py-1 rounded">docker-compose up -d</code></li>
+                      </ol>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </main>
+
+            {suspendModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-[#14181d] rounded-2xl border border-[#232a33] p-6 max-w-md w-full">
             <div className="flex items-center justify-between mb-4">
