@@ -1,12 +1,16 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
+import { ArtisansService } from '../artisans/artisans.service';
+import { BoutiquesService } from '../boutiques/boutiques.service';
 import { User, UserType } from '../users/user.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
+    private artisansService: ArtisansService,
+    private boutiquesService: BoutiquesService,
     private jwtService: JwtService,
   ) {}
 
@@ -18,23 +22,41 @@ export class AuthService {
     return null;
   }
 
-  async login(user: User) {
-    const payload = {
-      email: user.email,
-      sub: user.id,
-      type: user.type,
-    };
-    return {
-      access_token: this.jwtService.sign(payload),
-      user: {
-        id: user.id,
+    async login(user: User) {
+      const payload = {
         email: user.email,
-        nom: user.nom,
-        prenom: user.prenom,
+        sub: user.id,
         type: user.type,
-      },
-    };
-  }
+      };
+    
+      // For artisan users, get their boutique subDomain
+      let boutiqueSubDomain: string | null = null;
+      if (user.type === UserType.ARTISAN) {
+        try {
+          const artisan = await this.artisansService.findByUserId(user.id);
+          if (artisan) {
+            const boutiques = await this.boutiquesService.findByArtisanId(artisan.id);
+            if (boutiques && boutiques.length > 0) {
+              boutiqueSubDomain = boutiques[0].subDomain;
+            }
+          }
+        } catch (err) {
+          console.error('Error fetching artisan boutique:', err);
+        }
+      }
+    
+      return {
+        access_token: this.jwtService.sign(payload),
+        user: {
+          id: user.id,
+          email: user.email,
+          nom: user.nom,
+          prenom: user.prenom,
+          type: user.type,
+          boutiqueSubDomain,
+        },
+      };
+    }
 
   async register(data: {
     email: string;

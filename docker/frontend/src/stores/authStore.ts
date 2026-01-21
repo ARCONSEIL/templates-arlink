@@ -7,6 +7,7 @@ interface User {
   nom?: string
   prenom?: string
   type: string
+  boutiqueSubDomain?: string | null
 }
 
 interface AuthState {
