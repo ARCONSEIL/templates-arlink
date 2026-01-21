@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet'
-import { ChevronLeft, ChevronRight, Search, User, Menu } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Search, User, Menu, Eye, EyeOff } from 'lucide-react'
 import { boutiquesService, categoriesService, productsService } from '../services/api'
 import { useAuthStore } from '../stores/authStore'
 
@@ -43,6 +43,7 @@ interface Product {
   img2?: string
   img3?: string
   prix?: number
+  vedette?: boolean
 }
 
 interface MapBoutique {
@@ -86,8 +87,9 @@ export default function HomePage() {
   const [registerName, setRegisterName] = useState('')
   const [registerEmail, setRegisterEmail] = useState('')
   const [registerPassword, setRegisterPassword] = useState('')
-  const [registerConfirmPassword, setRegisterConfirmPassword] = useState('')
-  const { user, logout, login, register } = useAuthStore()
+    const [registerConfirmPassword, setRegisterConfirmPassword] = useState('')
+    const [showLoginPassword, setShowLoginPassword] = useState(false)
+    const { user, logout, login, register } = useAuthStore()
 
   useEffect(() => {
     loadMapData()
@@ -104,17 +106,20 @@ export default function HomePage() {
         const products: Product[] = productsResponse.data || []
         const boutiquesData: MapBoutique[] = boutiquesResponse.data || []
       
-        // Associate product images with boutiques
-        const boutiquesWithImages = boutiquesData.map(boutique => {
-          const boutiqueProducts = products.filter(p => p.boutiqueId === boutique.id)
-          const firstProductWithImage = boutiqueProducts.find(p => p.img1 && p.img1 !== '/')
-          const productImage = firstProductWithImage?.img1 
-            ? (firstProductWithImage.img1.startsWith('http') 
-                ? firstProductWithImage.img1 
-                : `https://arlink.online${firstProductWithImage.img1}`)
-            : undefined
-          return { ...boutique, productImage }
-        })
+                // Associate product images with boutiques - prioritize vedette (featured) product
+                const boutiquesWithImages = boutiquesData.map(boutique => {
+                  const boutiqueProducts = products.filter(p => p.boutiqueId === boutique.id)
+                  // First try to find the vedette (featured) product
+                  const vedetteProduct = boutiqueProducts.find(p => p.vedette && p.img1 && p.img1 !== '/')
+                  // Fallback to first product with image
+                  const firstProductWithImage = vedetteProduct || boutiqueProducts.find(p => p.img1 && p.img1 !== '/')
+                  const productImage = firstProductWithImage?.img1 
+                    ? (firstProductWithImage.img1.startsWith('http') 
+                        ? firstProductWithImage.img1 
+                        : `https://arlink.online${firstProductWithImage.img1}`)
+                    : undefined
+                  return { ...boutique, productImage }
+                })
       
         setMapBoutiques(boutiquesWithImages)
       } catch (error) {
@@ -350,16 +355,39 @@ export default function HomePage() {
               {/* Content */}
               <div className="p-6">
                 {activeTab === 'connexion' ? (
-                  <form onSubmit={async (e) => {
-                    e.preventDefault()
-                    try {
-                      await login(loginEmail, loginPassword)
-                      setShowLoginSidebar(false)
-                      navigate('/dashboard')
-                    } catch (err) {
-                      console.error('Login error:', err)
-                    }
-                  }} className="space-y-4">
+                                                                                                                                                <form onSubmit={async (e) => {
+                                                                                                                                                  e.preventDefault()
+                                                                                                                                                  try {
+                                                                                                                                                    const result = await login(loginEmail, loginPassword)
+                                                                                                                                                    setShowLoginSidebar(false)
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                // Redirect based on user type
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                if (result?.user?.type === 'admin') {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  navigate('/admin')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                } else if (result?.user?.type === 'super_admin') {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  navigate('/super-admin')
+                                                                                                                                                    } else if (result?.user?.type === 'artisan') {
+                                                                                                                                                      // Get artisan's boutique name for URL
+                                                                                                                                                      try {
+                                                                                                                                                        const response = await fetch('https://arlink.online/api/boutiques')
+                                                                                                                                                        const boutiques = await response.json()
+                                                                                                                                                        const artisanBoutique = boutiques.find((b: any) => 
+                                                                                                                                                          b.societe?.toLowerCase() === result.user.nom?.toLowerCase()
+                                                                                                                                                        )
+                                                                                                                                                        if (artisanBoutique?.subDomain) {
+                                                                                                                                                          navigate(`/dashboard/artisan/${artisanBoutique.subDomain}`)
+                                                                                                                                                          return
+                                                                                                                                                        }
+                                                                                                                                                      } catch (err) {
+                                                                                                                                                        console.error('Error fetching boutique:', err)
+                                                                                                                                                      }
+                                                                                                                                                      navigate('/dashboard/artisan')
+                                                                                                                                                    } else {
+                                                                                                                                                      navigate('/dashboard/client')
+                                                                                                                                                    }
+                                                                                                                                                  } catch (err) {
+                                                                                                                                                    console.error('Login error:', err)
+                                                                                                                                                  }
+                                                                                                                                                }} className="space-y-4">
                     <div>
                       <label className="block text-gold text-sm mb-2 font-medium">Email</label>
                       <input
@@ -371,22 +399,31 @@ export default function HomePage() {
                         required
                       />
                     </div>
-                    <div>
-                      <label className="block text-gold text-sm mb-2 font-medium">Mot de passe</label>
-                      <input
-                        type="password"
-                        value={loginPassword}
-                        onChange={(e) => setLoginPassword(e.target.value)}
-                        placeholder="********"
-                        className="w-full bg-[#2a2a2a] border border-gold rounded-md px-4 py-3 text-cream placeholder-gray-500 focus:border-[#e1c587] focus:outline-none transition"
-                        required
-                      />
-                      <div className="text-right mt-2">
-                        <a href="#" className="text-[#e1c587] text-sm hover:text-gold transition">
-                          Mot de passe oublie ?
-                        </a>
-                      </div>
-                    </div>
+                                        <div>
+                                          <label className="block text-gold text-sm mb-2 font-medium">Mot de passe</label>
+                                          <div className="relative">
+                                            <input
+                                              type={showLoginPassword ? 'text' : 'password'}
+                                              value={loginPassword}
+                                              onChange={(e) => setLoginPassword(e.target.value)}
+                                              placeholder="********"
+                                              className="w-full bg-[#2a2a2a] border border-gold rounded-md px-4 py-3 pr-12 text-cream placeholder-gray-500 focus:border-[#e1c587] focus:outline-none transition"
+                                              required
+                                            />
+                                            <button
+                                              type="button"
+                                              onClick={() => setShowLoginPassword(!showLoginPassword)}
+                                              className="absolute right-3 top-1/2 -translate-y-1/2 text-gold hover:text-cream transition"
+                                            >
+                                              {showLoginPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                            </button>
+                                          </div>
+                                          <div className="text-right mt-2">
+                                            <a href="#" className="text-[#e1c587] text-sm hover:text-gold transition">
+                                              Mot de passe oublie ?
+                                            </a>
+                                          </div>
+                                        </div>
                     <button type="submit" className="w-full bg-gold text-[#0a0a0a] py-3 rounded-md font-semibold hover:bg-[#e1c587] transition transform hover:-translate-y-0.5">
                       Se connecter
                     </button>

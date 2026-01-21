@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { IsEmail, IsString, IsOptional } from 'class-validator';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { UserType } from '../users/user.entity';
@@ -20,15 +21,29 @@ const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI || 'https://arlink.o
 const FRONTEND_URL = process.env.FRONTEND_URL || 'https://arlink.online';
 
 class LoginDto {
+  @IsEmail()
   email: string;
+
+  @IsString()
   password: string;
 }
 
 class RegisterDto {
+  @IsEmail()
   email: string;
+
+  @IsString()
   password: string;
+
+  @IsOptional()
+  @IsString()
   nom?: string;
+
+  @IsOptional()
+  @IsString()
   prenom?: string;
+
+  @IsOptional()
   type?: UserType;
 }
 

@@ -539,9 +539,22 @@ export default function AdminDashboardPage() {
                             <span className="text-[#666]">-</span>
                           )}
                         </td>
-                        <td className="px-2 py-2">
-                          <span className="px-2 py-0.5 text-xs rounded bg-[#BFA26A]/20 text-[#BFA26A]">{artisan.categorie || '-'}</span>
-                        </td>
+                                                <td className="px-2 py-2">
+                                                  {editingArtisan === artisan.id ? (
+                                                    <select value={artisan.categorie || ''} onChange={(e) => handleUpdateArtisan(artisan.id, 'categorie', e.target.value)} className="bg-[#0d0f12] border border-[#232a33] rounded px-2 py-1 text-xs w-28">
+                                                      <option value="">-</option>
+                                                      <option value="Bijoux">Bijoux</option>
+                                                      <option value="Cosmetique">Cosmetique</option>
+                                                      <option value="Cuir">Cuir</option>
+                                                      <option value="Gastronomie">Gastronomie</option>
+                                                      <option value="Mode">Mode</option>
+                                                      <option value="Decoration">Decoration</option>
+                                                      <option value="Artisanat">Artisanat</option>
+                                                    </select>
+                                                  ) : (
+                                                    <span className="px-2 py-0.5 text-xs rounded bg-[#BFA26A]/20 text-[#BFA26A]">{artisan.categorie || '-'}</span>
+                                                  )}
+                                                </td>
                         <td className="px-2 py-2 text-center font-medium">{artisan.nbArticles}</td>
                         <td className="px-2 py-2">
                           <span className={'px-2 py-0.5 text-xs rounded ' + getStatusColor(artisan.status)}>{artisan.status}</span>

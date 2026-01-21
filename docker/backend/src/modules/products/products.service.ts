@@ -57,11 +57,20 @@ export class ProductsService {
     return this.productsRepository.save(product);
   }
 
-  async update(id: string, data: Partial<Product>): Promise<Product> {
-    const product = await this.findOne(id);
-    Object.assign(product, data);
-    return this.productsRepository.save(product);
-  }
+    async update(id: string, data: Partial<Product>): Promise<Product> {
+      const product = await this.findOne(id);
+    
+      // If setting this product as vedette, remove vedette from all other products in the same boutique
+      if (data.vedette === true && product.boutiqueId) {
+        await this.productsRepository.update(
+          { boutiqueId: product.boutiqueId, vedette: true },
+          { vedette: false }
+        );
+      }
+    
+      Object.assign(product, data);
+      return this.productsRepository.save(product);
+    }
 
   async remove(id: string): Promise<void> {
     const product = await this.findOne(id);

@@ -14,7 +14,7 @@ interface AuthState {
   token: string | null
   isLoading: boolean
   error: string | null
-  login: (email: string, password: string) => Promise<void>
+  login: (email: string, password: string) => Promise<{ user: User; access_token: string } | undefined>
   loginWithGoogle: (data: { email: string; nom?: string; prenom?: string; googleId: string }) => Promise<void>
   register: (data: { email: string; password: string; nom?: string; prenom?: string; type?: string }) => Promise<void>
   logout: () => void
@@ -28,19 +28,20 @@ export const useAuthStore = create<AuthState>((set) => ({
   isLoading: false,
   error: null,
 
-    login: async (email: string, password: string) => {
-      set({ isLoading: true, error: null })
-      try {
-        const response = await authService.login(email, password)
-        const { access_token, user } = response.data
-        localStorage.setItem('token', access_token)
-        set({ user, token: access_token, isLoading: false })
-      } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : 'Login failed'
-        set({ error: errorMessage, isLoading: false })
-        throw error
-      }
-    },
+        login: async (email: string, password: string) => {
+          set({ isLoading: true, error: null })
+          try {
+            const response = await authService.login(email, password)
+            const { access_token, user } = response.data
+            localStorage.setItem('token', access_token)
+            set({ user, token: access_token, isLoading: false })
+            return { user, access_token }
+          } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'Login failed'
+            set({ error: errorMessage, isLoading: false })
+            throw error
+          }
+        },
 
     loginWithGoogle: async (data: { email: string; nom?: string; prenom?: string; googleId: string }) => {
       set({ isLoading: true, error: null })

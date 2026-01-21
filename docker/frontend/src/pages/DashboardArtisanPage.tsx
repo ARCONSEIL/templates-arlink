@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Plus, Eye, ChevronLeft, ChevronRight, Search, Bell, Settings, LogOut, Save, Trash2, Upload, Edit2, X, Check, RefreshCw } from 'lucide-react'
 import { useAuthStore } from '../stores/authStore'
 import { productsService, boutiquesService, artisansService, ordersService } from '../services/api'
@@ -50,6 +50,7 @@ interface SocialNetwork {
 
 export default function DashboardArtisanPage() {
   const navigate = useNavigate()
+  const { boutiqueName } = useParams<{ boutiqueName?: string }>()
   const { user, logout } = useAuthStore()
   const fileInputRef = useRef<HTMLInputElement>(null)
   
@@ -61,6 +62,7 @@ export default function DashboardArtisanPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [newProduct, setNewProduct] = useState({ nom: '', description: '', prix_artisan_ht: 0, stock: 0, categorie: '', tva: 20 })
+  const [currentBoutiqueId, setCurrentBoutiqueId] = useState<string | null>(null)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [uploadedImages, setUploadedImages] = useState<string[]>([])
   
@@ -99,28 +101,62 @@ export default function DashboardArtisanPage() {
     { id: 'preview', icon: '👁️', label: 'Mon Avant-gout' },
   ]
 
-  useEffect(() => {
-    loadProducts()
-    loadOrders()
-    loadBoutique()
-  }, [])
+    useEffect(() => {
+      loadProducts()
+      loadOrders()
+      loadBoutique()
+    }, [boutiqueName])
 
   const showNotification = (type: 'success' | 'error', message: string) => {
     setNotification({ type, message })
     setTimeout(() => setNotification(null), 3000)
   }
 
-  const loadProducts = async () => {
-    try {
-      const response = await productsService.getAll()
-      if (response.data) setProducts(response.data)
-    } catch {
-      setProducts([
-        { id: '1', nom: 'Collier Amazigh', description: 'Collier traditionnel berbere', prix_artisan_ht: 77.39, prix_public_ht: 89, prix_ttc: 106.80, stock: 12, categorie: 'Bijoux', images: ['https://moroccanzest.com/wp-content/uploads/2019/02/moroccan-jewelry.jpg'], vedette: true },
-        { id: '2', nom: 'Bracelet Touareg', description: 'Bracelet en cuir et argent', prix_artisan_ht: 39.13, prix_public_ht: 45, prix_ttc: 54, stock: 8, categorie: 'Bijoux', images: ['https://static01.nyt.com/images/2024/12/06/multimedia/06sp-jewelry-atlas-inyt-01-ljtb/29sp-jewelry-atlas-inyt-01-ljtb-videoSixteenByNineJumbo1600.jpg'], vedette: false },
-      ])
+        const loadProducts = async () => {
+          try {
+            // First get the boutique by subdomain to get its ID
+            if (boutiqueName) {
+              const boutiqueResponse = await boutiquesService.getBySubDomain(boutiqueName)
+              if (boutiqueResponse.data?.id) {
+                // Save the boutique ID for creating new products
+                setCurrentBoutiqueId(boutiqueResponse.data.id)
+                const response = await productsService.getByBoutique(boutiqueResponse.data.id)
+                if (response.data) {
+                                setProducts(response.data.map((p: any) => ({
+                                  id: p.id,
+                                  nom: p.nom,
+                                  description: p.description || '',
+                                  prix_artisan_ht: p.prix || 0,
+                                  prix_public_ht: (p.prix || 0) * 1.15,
+                                  prix_ttc: (p.prix || 0) * 1.15 * 1.2,
+                                  stock: p.stock || 0,
+                                  categorie: p.categorie || '',
+                                  images: [p.img1, p.img2, p.img3].filter(Boolean),
+                                  vedette: p.vedette || false
+                                })))
+                  return
+                }
+              }
+            }
+                // Fallback: get all products
+                const response = await productsService.getAll()
+                if (response.data) setProducts(response.data.map((p: any) => ({
+                  id: p.id,
+                  nom: p.nom,
+                  description: p.description || '',
+                  prix_artisan_ht: p.prix || 0,
+                  prix_public_ht: (p.prix || 0) * 1.15,
+                  prix_ttc: (p.prix || 0) * 1.15 * 1.2,
+                  stock: p.stock || 0,
+                  categorie: p.categorie || '',
+                  images: [p.img1, p.img2, p.img3].filter(Boolean),
+                  vedette: p.vedette || false
+                })))
+      } catch (err) {
+        console.error('Error loading products:', err)
+        setProducts([])
+      }
     }
-  }
 
   const loadOrders = async () => {
     try {
@@ -151,26 +187,50 @@ export default function DashboardArtisanPage() {
 
   const handleLogout = () => { logout(); navigate('/') }
 
-  const handleAddProduct = async () => {
-    if (!newProduct.nom || !newProduct.prix_artisan_ht) { showNotification('error', 'Nom et prix obligatoires'); return }
-    setLoading(true)
-    try {
-      const prix_public_ht = newProduct.prix_artisan_ht * 1.15
-      const prix_ttc = prix_public_ht * (1 + newProduct.tva / 100)
-      const productData = { ...newProduct, prix_public_ht, prix_ttc, images: uploadedImages, vedette: false }
-      const response = await productsService.create(productData)
-      if (response.data) { setProducts([...products, response.data]); showNotification('success', 'Article ajoute!') }
-    } catch {
-      const prix_public_ht = newProduct.prix_artisan_ht * 1.15
-      const prix_ttc = prix_public_ht * (1 + newProduct.tva / 100)
-      const product: Product = { id: Date.now().toString(), nom: newProduct.nom, description: newProduct.description, prix_artisan_ht: newProduct.prix_artisan_ht, prix_public_ht, prix_ttc, stock: newProduct.stock, categorie: newProduct.categorie, images: uploadedImages, vedette: false }
-      setProducts([...products, product])
-      showNotification('success', 'Article ajoute localement')
+    const handleAddProduct = async () => {
+      if (!newProduct.nom || !newProduct.prix_artisan_ht) { showNotification('error', 'Nom et prix obligatoires'); return }
+      if (!currentBoutiqueId) { showNotification('error', 'Boutique non trouvee'); return }
+      setLoading(true)
+      try {
+        const productData = {
+          nom: newProduct.nom,
+          description: newProduct.description,
+          prix: newProduct.prix_artisan_ht,
+          stock: newProduct.stock,
+          categorie: newProduct.categorie,
+          boutiqueId: currentBoutiqueId,
+          img1: uploadedImages[0] || null,
+          img2: uploadedImages[1] || null,
+          img3: uploadedImages[2] || null,
+          vedette: false,
+          statut: 'active'
+        }
+        const response = await productsService.create(productData)
+        if (response.data) {
+          const p = response.data
+          const mappedProduct: Product = {
+            id: p.id,
+            nom: p.nom,
+            description: p.description || '',
+            prix_artisan_ht: p.prix || 0,
+            prix_public_ht: (p.prix || 0) * 1.15,
+            prix_ttc: (p.prix || 0) * 1.15 * 1.2,
+            stock: p.stock || 0,
+            categorie: p.categorie || '',
+            images: [p.img1, p.img2, p.img3].filter(Boolean),
+            vedette: p.vedette || false
+          }
+          setProducts([...products, mappedProduct])
+          showNotification('success', 'Article ajoute!')
+        }
+      } catch (error) {
+        console.error('Error creating product:', error)
+        showNotification('error', 'Erreur lors de la creation')
+      }
+      setNewProduct({ nom: '', description: '', prix_artisan_ht: 0, stock: 0, categorie: '', tva: 20 })
+      setUploadedImages([])
+      setLoading(false)
     }
-    setNewProduct({ nom: '', description: '', prix_artisan_ht: 0, stock: 0, categorie: '', tva: 20 })
-    setUploadedImages([])
-    setLoading(false)
-  }
 
   const handleUpdateProduct = async (product: Product) => {
     setLoading(true)
@@ -190,10 +250,25 @@ export default function DashboardArtisanPage() {
     setLoading(false)
   }
 
-  const handleToggleVedette = async (product: Product) => {
-    const updated = { ...product, vedette: !product.vedette }
-    await handleUpdateProduct(updated)
-  }
+    const handleToggleVedette = async (product: Product) => {
+      // If turning ON vedette, first turn OFF all other vedettes (only one vedette per boutique)
+      if (!product.vedette) {
+        // Set all other products to vedette=false
+        const updatedProducts = products.map(p => 
+          p.id === product.id ? { ...p, vedette: true } : { ...p, vedette: false }
+        )
+        setProducts(updatedProducts)
+        // Update in backend - set this product as vedette
+        await handleUpdateProduct({ ...product, vedette: true })
+        showNotification('success', 'Article mis en vedette!')
+      } else {
+        // Just toggle off
+        const updated = { ...product, vedette: false }
+        setProducts(products.map(p => p.id === product.id ? updated : p))
+        await handleUpdateProduct(updated)
+        showNotification('success', 'Article retire de la vedette')
+      }
+    }
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
@@ -687,7 +762,7 @@ export default function DashboardArtisanPage() {
               <h2 className="text-2xl font-bold text-[#EDE6D2]">Ma Boutique</h2>
               <div className="rounded-3xl border border-[#232a33] bg-[#14181d] p-6">
                 <p className="text-[#CFC6AE]">Votre boutique est accessible a l'adresse:</p>
-                <a href={`https://${boutique?.slug || 'maboutique'}.arlink.online`} target="_blank" rel="noopener noreferrer" className="text-[#3B82F6] text-lg font-semibold hover:underline mt-2 block">{boutique?.slug || 'maboutique'}.arlink.online</a>
+                <a href={`https://${boutiqueName || boutique?.slug || 'maboutique'}.arlink.online`} target="_blank" rel="noopener noreferrer" className="text-[#3B82F6] text-lg font-semibold hover:underline mt-2 block">{boutiqueName || boutique?.slug || 'maboutique'}.arlink.online</a>
                 <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="text-sm text-[#CFC6AE] block mb-2">Photo Vedette</label>
@@ -713,7 +788,7 @@ export default function DashboardArtisanPage() {
                   </div>
                 </div>
                 <div className="mt-6 flex gap-3">
-                  <a href={`https://${boutique?.slug || 'maboutique'}.arlink.online`} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-[#3B82F6] text-white font-bold rounded-xl hover:brightness-95 transition flex items-center gap-2"><Eye className="w-4 h-4" />Voir ma boutique</a>
+                  <a href={`https://${boutiqueName || boutique?.slug || 'maboutique'}.arlink.online`} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-[#3B82F6] text-white font-bold rounded-xl hover:brightness-95 transition flex items-center gap-2"><Eye className="w-4 h-4" />Voir ma boutique</a>
                   <button onClick={() => setActiveSection('info')} className="px-4 py-2 bg-[#0d0f12] border border-[#232a33] rounded-xl hover:border-[#BFA26A] transition">Personnaliser</button>
                 </div>
               </div>

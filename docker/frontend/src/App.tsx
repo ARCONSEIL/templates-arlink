@@ -38,6 +38,7 @@ function App() {
       <Route path="/panier" element={<CartPage />} />
       <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/dashboard/artisan" element={<DashboardArtisanPage />} />
+            <Route path="/dashboard/artisan/:boutiqueName" element={<DashboardArtisanPage />} />
             <Route path="/dashboard/client" element={<DashboardClientPage />} />
             <Route path="/admin" element={<AdminDashboardPage />} />
             <Route path="/super-admin" element={<SuperAdminDashboardPage />} />
