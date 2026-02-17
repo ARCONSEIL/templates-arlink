@@ -1,0 +1,49 @@
+# Dependencies - TEMPORARILY DISABLED FOR DOCKER BUILD
+# node_modules/
+
+# Build output - TEMPORARILY DISABLED FOR DOCKER BUILD
+# dist/
+
+# *.log
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*.sublime*
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.docker/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+
+# Documentation
+*.md
+docs/
+README*
+
+# OS files
+.DS_Store
+Thumbs.db
+*.bak
+*~
+
+# Progress tracking (internal docs)
+progress_track/
+

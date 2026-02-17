@@ -1,0 +1,29 @@
+{
+  "type": "postgres",
+  "host": "localhost",
+  "port": 5432,
+  "username": "postgres",
+  "password": "",
+  "database": "arlink_v3",
+  "entities": [
+    "dist/users/entities/*.js",
+    "dist/shops/entities/*.js",
+    "dist/products/entities/*.js",
+    "dist/orders/entities/*.js",
+    "dist/payment/entities/*.js",
+    "dist/categories/entities/*.js",
+    "dist/comment/entities/*.js",
+    "dist/followers/entities/*.js",
+    "dist/likes/entities/*.js",
+    "dist/ratings/entities/*.js",
+    "dist/reviews/entities/*.js",
+    "dist/notification/entities/*.js",
+    "dist/tenant/entities/*.js"
+  ],
+  "migrations": ["dist/migrations/*.js"],
+  "cli": {
+    "migrationsDir": "src/migrations",
+    "entitiesDir": "src"
+  }
+}
+

@@ -1,0 +1,27 @@
+# robots.txt for ARLinK
+# La plateforme mondiale de l'artisanat authentique
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://dev.arlink.online/sitemap.xml
+
+# Disallow admin/private areas
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /auth/
+Disallow: /checkout
+Disallow: /profile
+Disallow: /orders/
+Disallow: /cart
+Disallow: /wishlist
+
+# Crawl-delay for non-google bots
+Crawl-delay: 10
+
+---
+# ARLinK - L'Artisanat Mondial
+# https://dev.arlink.online
+

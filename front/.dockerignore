@@ -1,0 +1,56 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+*.log
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.docker/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Testing
+coverage/
+cypress/videos/
+cypress/screenshots/
+*.lcov
+
+# Source code (keep public folder)
+src/
+!src/**/*.tsx
+!src/**/*.ts
+!src/**/*.css
+
+# Documentation
+*.md
+README*
+docs/
+
+# OS files
+.DS_Store
+Thumbs.db
+*.bak
+*~
+
+# Misc
+*.lock
+yarn.lock
+pnpm-lock.yaml
+
