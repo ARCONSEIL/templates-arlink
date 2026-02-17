@@ -44,6 +44,7 @@ const SettingsPage = lazy(() => import('./pages/admin/settings').then(m => ({ de
 const ContentManagementPage = lazy(() => import('./pages/admin/content').then(m => ({ default: m.ContentManagementPage })));
 const ClientDashboardPage = lazy(() => import('./pages/client-dashboard/ClientDashboardPage'));
 const PromoPage = lazy(() => import('./pages/promo/PromoPage'));
+const InfoPage = lazy(() => import('./pages/info/InfoPage'));
 const ConditionsPage = lazy(() => import('./pages/legal/ConditionsPage'));
 const PrivacyPolicyPage = lazy(() => import('./pages/legal/PrivacyPolicyPage'));
 
@@ -178,6 +179,15 @@ function AppRoutes() {
         <Route path="/privacy" element={<PrivacyPolicyPage />} />
         <Route path="/confidentialite" element={<PrivacyPolicyPage />} />
         <Route path="/promo/:slug" element={<PromoPage />} />
+        <Route path="/a-propos" element={<InfoPage />} />
+        <Route path="/contact" element={<InfoPage />} />
+        <Route path="/aide" element={<InfoPage />} />
+        <Route path="/expo3d" element={<InfoPage />} />
+        <Route path="/encheres" element={<InfoPage />} />
+        <Route path="/guide" element={<InfoPage />} />
+        <Route path="/tarifs" element={<InfoPage />} />
+        <Route path="/ressources" element={<InfoPage />} />
+        <Route path="/blog" element={<InfoPage />} />
 
         {/* Guest Routes (only for non-authenticated users) */}
         <Route element={<GuestRoute />}>
