@@ -226,7 +226,7 @@ const PromoPage = () => {
         <div className="promo-not-found">
           <h1>Page non trouvee</h1>
           <p>Le contenu que vous recherchez n'existe pas.</p>
-          <Link to="/login" className="promo-cta-btn">Retour a l'inscription</Link>
+          <Link to="/" className="promo-cta-btn">Retour a l'accueil</Link>
         </div>
         <Footer />
       </div>
@@ -244,7 +244,7 @@ const PromoPage = () => {
       <Header variant="default" />
 
       <div className="promo-hero" style={content.image ? { backgroundImage: `linear-gradient(rgba(10,10,10,0.85), rgba(10,10,10,0.95)), url(${content.image})` } : {}}>
-        <Link to="/login" className="promo-back-btn">
+        <Link to="/" className="promo-back-btn">
           <ArrowLeft size={18} /> Retour
         </Link>
         <div className="promo-hero-content">

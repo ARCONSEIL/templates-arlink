@@ -5,7 +5,7 @@ import { setAuthToken, setCurrentUser, getAuthHeader } from "../../utils/auth";
 import { useAuth } from "../../hooks/useAuth";
 import type { User } from "../../types";
 import { UserRole } from "../../enums";
-import { Palette, ShoppingBag, Gem, Sun } from 'lucide-react';
+import { Palette, ShoppingBag, Gem, Sun, Eye, EyeOff } from 'lucide-react';
 import { API_BASE_URL as CONTENT_API_URL } from "../../config/constants";
 import "./LoginPage.css";
 
@@ -27,6 +27,15 @@ const LoginPage = () => {
   // Login form
   const [loginIdentifier, setLoginIdentifier] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
+
+  // Password visibility
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showRegPassword, setShowRegPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Forgot password
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
 
   // Magic link
   const [magicEmail, setMagicEmail] = useState("");
@@ -251,6 +260,39 @@ const LoginPage = () => {
     }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage(null);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.AUTH.FORGOT_PASSWORD}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: forgotEmail }),
+      });
+
+      if (response.ok) {
+        setMessage({
+          type: "success",
+          text: "Un email de r\u00e9initialisation a \u00e9t\u00e9 envoy\u00e9. V\u00e9rifiez votre bo\u00eete de r\u00e9ception (et vos spams).",
+        });
+        setForgotEmail("");
+        setTimeout(() => setShowForgotPassword(false), 3000);
+      } else {
+        const error = await response.json();
+        setMessage({
+          type: "error",
+          text: error.message || "Erreur lors de l'envoi",
+        });
+      }
+    } catch {
+      setMessage({ type: "error", text: "Erreur de connexion au serveur" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleGoogleLogin = () => {
     window.location.href = `${API_BASE_URL}${API_ENDPOINTS.AUTH.GOOGLE}`;
   };
@@ -291,22 +333,44 @@ const LoginPage = () => {
                 />
 
                 <label>Mot de passe</label>
-                <input
-                  type="password"
-                  placeholder="Votre mot de passe"
-                  value={loginPassword}
-                  onChange={(e) => setLoginPassword(e.target.value)}
-                  required
-                />
+                <div className="password-input-wrapper">
+                  <input
+                    type={showLoginPassword ? "text" : "password"}
+                    placeholder="Votre mot de passe"
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    required
+                  />
+                  <button type="button" className="password-toggle" onClick={() => setShowLoginPassword(!showLoginPassword)} aria-label="Afficher/masquer le mot de passe">
+                    {showLoginPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
 
                 <button type="submit" disabled={loading} className="primary-btn">
                   {loading ? "Connexion..." : "SE CONNECTER"}
                 </button>
               </form>
 
-              <button className="link-btn forgot-password">
+              <button className="link-btn forgot-password" onClick={() => { setShowForgotPassword(!showForgotPassword); setMessage(null); }}>
                 Mot de passe oublié ?
               </button>
+
+              {showForgotPassword && (
+                <div className="forgot-password-section">
+                  <form onSubmit={handleForgotPassword} className="forgot-password-form">
+                    <input
+                      type="email"
+                      placeholder="Entrez votre email"
+                      value={forgotEmail}
+                      onChange={(e) => setForgotEmail(e.target.value)}
+                      required
+                    />
+                    <button type="submit" disabled={loading} className="magic-btn">
+                      {loading ? "Envoi..." : "R\u00c9INITIALISER"}
+                    </button>
+                  </form>
+                </div>
+              )}
 
               <div className="magic-link-section">
                 <p className="magic-link-label">Connexion par lien magique</p>
@@ -479,25 +543,35 @@ const LoginPage = () => {
                 <div className="form-row">
                   <div className="form-group">
                     <label>Mot de passe</label>
-                    <input
-                      type="password"
-                      placeholder="Min. 10 caractères"
-                      value={regPassword}
-                      onChange={(e) => setRegPassword(e.target.value)}
-                      required
-                      minLength={10}
-                    />
+                    <div className="password-input-wrapper">
+                      <input
+                        type={showRegPassword ? "text" : "password"}
+                        placeholder="Min. 10 caract\u00e8res"
+                        value={regPassword}
+                        onChange={(e) => setRegPassword(e.target.value)}
+                        required
+                        minLength={10}
+                      />
+                      <button type="button" className="password-toggle" onClick={() => setShowRegPassword(!showRegPassword)} aria-label="Afficher/masquer le mot de passe">
+                        {showRegPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
                   </div>
                   <div className="form-group">
                     <label>Confirmer</label>
-                    <input
-                      type="password"
-                      placeholder="Confirmez"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      required
-                      minLength={10}
-                    />
+                    <div className="password-input-wrapper">
+                      <input
+                        type={showConfirmPassword ? "text" : "password"}
+                        placeholder="Confirmez"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        required
+                        minLength={10}
+                      />
+                      <button type="button" className="password-toggle" onClick={() => setShowConfirmPassword(!showConfirmPassword)} aria-label="Afficher/masquer le mot de passe">
+                        {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
                   </div>
                 </div>
 
