@@ -44,11 +44,11 @@ const LoginPage = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   // Ad cards state
-  const [adCards, setAdCards] = useState<Array<{icon: string; title: string; description: string; badge: string; link: string}>>([
-    { icon: "palette", title: "Artisans du Monde", description: "Connectez-vous avec des artisans talentueux des 4 coins du globe. Découvrez des créations authentiques et uniques.", badge: "20M+ ARTISANS", link: "/promo/artisans-du-monde" },
-    { icon: "shopping-bag", title: "Boutiques Personnalisées", description: "Chaque artisan dispose de sa propre boutique en ligne avec son sous-domaine unique.", badge: "GRATUIT CLASSIC", link: "/promo/boutiques-personnalisees" },
-    { icon: "gem", title: "Produits Premium", description: "De la céramique à la joaillerie, du textile au bois sculpté. Trouvez le produit artisanal parfait.", badge: "1000+ PRODUITS PRO", link: "/promo/produits-premium" },
-    { icon: "sun", title: "Rejoignez-nous", description: "Lancez votre boutique en quelques clics. Vendez vos créations au monde entier.", badge: "INSCRIPTION SIMPLE", link: "/promo/rejoignez-nous" },
+  const [adCards, setAdCards] = useState<Array<{icon: string; title: string; description: string; badge: string; link: string; image: string}>>([
+    { icon: "palette", title: "Artisans du Monde", description: "Connectez-vous avec des artisans talentueux des 4 coins du globe.", badge: "20M+ ARTISANS", link: "/promo/artisans-du-monde", image: "https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=600" },
+    { icon: "shopping-bag", title: "Boutiques Personnalisées", description: "Chaque artisan dispose de sa propre boutique en ligne unique.", badge: "GRATUIT CLASSIC", link: "/promo/boutiques-personnalisees", image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600" },
+    { icon: "gem", title: "Produits Premium", description: "De la céramique à la joaillerie, du textile au bois sculpté.", badge: "1000+ PRODUITS PRO", link: "/promo/produits-premium", image: "https://images.unsplash.com/photo-1493106819501-66d381c466f1?w=600" },
+    { icon: "sun", title: "Rejoignez-nous", description: "Lancez votre boutique en quelques clics. Vendez au monde entier.", badge: "INSCRIPTION SIMPLE", link: "/promo/rejoignez-nous", image: "https://images.unsplash.com/photo-1556742393-d75f468bfcb0?w=600" },
   ]);
 
   // Shared state
@@ -106,6 +106,7 @@ const LoginPage = () => {
             description: item.description || "",
             badge: item.badgeText || "",
             link: item.link || "#",
+            image: item.image || "",
           })));
         }
       })
@@ -235,20 +236,7 @@ const LoginPage = () => {
       });
 
       if (response.ok) {
-        const data: LoginResponse = await response.json();
-        setAuthToken(data.token);
-        const userData = await fetchCurrentUser();
-        if (userData) {
-          login(data.token, userData);
-        }
-        setMessage({ type: "success", text: "Inscription réussie !" });
-        setTimeout(() => {
-          if (userType === "artisan") {
-            navigate("/dashboard");
-          } else {
-            navigate("/");
-          }
-        }, 1000);
+        setMessage({ type: "success", text: "Inscription réussie ! Votre compte est en attente de validation par un administrateur. Vous recevrez un email de confirmation." });
       } else {
         const error = await response.json();
         setMessage({
@@ -572,11 +560,16 @@ const LoginPage = () => {
           {adCards.map((card, idx) => {
             const IconComponent = card.icon === 'shopping-bag' ? ShoppingBag : card.icon === 'gem' ? Gem : card.icon === 'sun' ? Sun : Palette;
             return (
-              <div key={idx} className="info-card" onClick={() => { const slug = card.title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); navigate(`/promo/${slug}`); }} style={{ cursor: 'pointer' }}>
-                <div className="card-icon"><IconComponent size={32} /></div>
-                <h3>{card.title}</h3>
-                <p>{card.description}</p>
-                <button>{card.badge}</button>
+              <div key={idx} className="collection-card" onClick={() => { const slug = card.title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); navigate(`/promo/${slug}`); }}>
+                <div className="collection-image" style={{ backgroundImage: `url(${card.image})` }}>
+                  <div className="collection-overlay"></div>
+                </div>
+                <div className="collection-content">
+                  <div className="collection-icon"><IconComponent size={28} /></div>
+                  <h3 className="collection-title">{card.title}</h3>
+                  <p className="collection-description">{card.description}</p>
+                  <span className="collection-count">{card.badge}</span>
+                </div>
               </div>
             );
           })}
