@@ -23,7 +23,7 @@ const ClientDashboardPage = () => {
     reviewsCount: 0,
   });
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem('arlink_token');
