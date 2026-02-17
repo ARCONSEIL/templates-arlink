@@ -94,6 +94,63 @@ const defaultPromos: Record<string, PromoContent> = {
       stats: { inscription: '2 min', commission: '0%', support: '24/7' },
     },
   },
+  'saint-valentin': {
+    id: '5',
+    title: 'Saint-Valentin',
+    description: 'Cadeaux romantiques faits main pour celebrer l\'amour.',
+    icon: 'star',
+    image: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7',
+    link: '/stores',
+    badgeText: '127 CREATIONS',
+    metadata: {
+      longDescription: "Decouvrez notre collection speciale Saint-Valentin, une selection de cadeaux artisanaux faits main avec amour. Bijoux uniques, ceramiques romantiques, bougies parfumees, coffrets personnalises... Chaque creation est pensee pour exprimer vos sentiments les plus profonds. Offrez un cadeau qui a du sens, fabrique par des artisans passionnes du monde entier.",
+      features: [
+        "Bijoux faits main par des artisans joailliers",
+        "Coffrets cadeaux personnalisables",
+        "Emballage cadeau premium offert",
+        "Livraison express pour la Saint-Valentin",
+      ],
+      stats: { creations: '127', artisans: '45', pays: '12' },
+    },
+  },
+  'printemps': {
+    id: '6',
+    title: 'Printemps',
+    description: 'Collections fleuries et colorees pour celebrer le renouveau.',
+    icon: 'sun',
+    image: 'https://images.unsplash.com/photo-1490750967868-88aa4486c946',
+    link: '/stores',
+    badgeText: '203 CREATIONS',
+    metadata: {
+      longDescription: "Le printemps est la saison du renouveau et de la creativite. Decouvrez des collections artisanales inspirees par la nature en fleur : textiles aux motifs floraux, ceramiques aux couleurs vives, bijoux en pierres naturelles, et bien plus encore. Nos artisans capturent l'essence du printemps dans chaque creation.",
+      features: [
+        "Collections inspirees par la nature",
+        "Textiles et tissages aux couleurs printanieres",
+        "Ceramiques decoratives florales",
+        "Accessoires en materiaux naturels",
+      ],
+      stats: { creations: '203', artisans: '67', categories: '15' },
+    },
+  },
+  'ski-montagne': {
+    id: '7',
+    title: 'Ski & Montagne',
+    description: 'Artisanat de montagne pour les amoureux de l\'hiver.',
+    icon: 'globe',
+    image: 'https://images.unsplash.com/photo-1551524164-687a55dd1126',
+    link: '/stores',
+    badgeText: '156 CREATIONS',
+    metadata: {
+      longDescription: "Explorez l'artisanat de montagne avec notre collection Ski & Montagne. Plaids en laine tissee main, sculptures en bois, bijoux inspires des sommets, et objets decoratifs chaleureux. Nos artisans montagnards perpetuent des traditions seculaires tout en creant des pieces contemporaines qui rechauffent les coeurs.",
+      features: [
+        "Plaids et couvertures en laine artisanale",
+        "Sculptures et objets en bois des Alpes",
+        "Bijoux inspires de la montagne",
+        "Decorations chalet faites main",
+      ],
+      stats: { creations: '156', artisans: '38', regions: '8' },
+    },
+  },
 };
 
 const iconMap: Record<string, React.ComponentType<any>> = {
@@ -115,26 +172,28 @@ const PromoPage = () => {
   useEffect(() => {
     setLoading(true);
 
-    fetch(`${API_BASE_URL}/platform-content/ad-cards`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
-          const found = data.find((item: any) => {
-            const itemSlug = item.title
-              .toLowerCase()
-              .normalize('NFD')
-              .replace(/[\u0300-\u036f]/g, '')
-              .replace(/[^a-z0-9]+/g, '-')
-              .replace(/^-|-$/g, '');
-            return itemSlug === slug;
-          });
-          if (found) {
-            setContent(found);
-            setLoading(false);
-            return;
-          }
-        }
-        if (slug && defaultPromos[slug]) {
+    const findBySlug = (items: any[]): any => {
+      return items.find((item: any) => {
+        const itemSlug = item.title
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-|-$/g, '');
+        return itemSlug === slug;
+      });
+    };
+
+    Promise.all([
+      fetch(`${API_BASE_URL}/platform-content/ad-cards`).then((r) => r.json()).catch(() => []),
+      fetch(`${API_BASE_URL}/platform-content/collections`).then((r) => r.json()).catch(() => []),
+    ])
+      .then(([adCards, collections]) => {
+        const allItems = [...(Array.isArray(adCards) ? adCards : []), ...(Array.isArray(collections) ? collections : [])];
+        const found = findBySlug(allItems);
+        if (found) {
+          setContent(found);
+        } else if (slug && defaultPromos[slug]) {
           setContent(defaultPromos[slug]);
         }
         setLoading(false);

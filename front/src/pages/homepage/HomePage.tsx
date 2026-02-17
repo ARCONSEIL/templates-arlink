@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { Star } from "lucide-react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -35,6 +35,7 @@ interface Slide {
 
 export default function HomePage() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   const [activeCategory, setActiveCategory] = useState("all");
 
@@ -86,7 +87,7 @@ export default function HomePage() {
       description: "Cadeaux romantiques faits main",
       count: 127,
       image: "https://images.unsplash.com/photo-1518199266791-5375a83190b7",
-      link: "/seasonal/valentine",
+      link: "/promo/saint-valentin",
     },
     {
       title: "Printemps",
@@ -94,7 +95,7 @@ export default function HomePage() {
       description: "Collections fleuries & colorées",
       count: 203,
       image: "https://images.unsplash.com/photo-1490750967868-88aa4486c946",
-      link: "/seasonal/spring",
+      link: "/promo/printemps",
     },
     {
       title: "Ski & Montagne",
@@ -102,7 +103,7 @@ export default function HomePage() {
       description: "Artisanat pour l'hiver",
       count: 156,
       image: "https://images.unsplash.com/photo-1551524164-687a55dd1126",
-      link: "/seasonal/ski",
+      link: "/promo/ski-montagne",
     },
   ]);
 
@@ -412,7 +413,7 @@ export default function HomePage() {
             <div
               key={idx}
               className="collection-card"
-              onClick={() => (window.location.href = col.link)}
+              onClick={() => { const slug = col.title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); navigate(`/promo/${slug}`); }}
             >
               <div
                 className="collection-image"
