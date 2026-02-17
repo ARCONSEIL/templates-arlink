@@ -43,6 +43,7 @@ const AnalyticsPage = lazy(() => import('./pages/admin/analytics').then(m => ({ 
 const SettingsPage = lazy(() => import('./pages/admin/settings').then(m => ({ default: m.SettingsPage })));
 const ContentManagementPage = lazy(() => import('./pages/admin/content').then(m => ({ default: m.ContentManagementPage })));
 const ClientDashboardPage = lazy(() => import('./pages/client-dashboard/ClientDashboardPage'));
+const PromoPage = lazy(() => import('./pages/promo/PromoPage'));
 const ConditionsPage = lazy(() => import('./pages/legal/ConditionsPage'));
 const PrivacyPolicyPage = lazy(() => import('./pages/legal/PrivacyPolicyPage'));
 
@@ -176,6 +177,7 @@ function AppRoutes() {
         <Route path="/cgu" element={<ConditionsPage />} />
         <Route path="/privacy" element={<PrivacyPolicyPage />} />
         <Route path="/confidentialite" element={<PrivacyPolicyPage />} />
+        <Route path="/promo/:slug" element={<PromoPage />} />
 
         {/* Guest Routes (only for non-authenticated users) */}
         <Route element={<GuestRoute />}>

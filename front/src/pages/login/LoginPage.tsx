@@ -45,10 +45,10 @@ const LoginPage = () => {
 
   // Ad cards state
   const [adCards, setAdCards] = useState<Array<{icon: string; title: string; description: string; badge: string; link: string}>>([
-    { icon: "palette", title: "Artisans du Monde", description: "Connectez-vous avec des artisans talentueux des 4 coins du globe. Découvrez des créations authentiques et uniques.", badge: "20M+ ARTISANS", link: "#" },
-    { icon: "shopping-bag", title: "Boutiques Personnalisées", description: "Chaque artisan dispose de sa propre boutique en ligne avec son sous-domaine unique.", badge: "GRATUIT CLASSIC", link: "#" },
-    { icon: "gem", title: "Produits Premium", description: "De la céramique à la joaillerie, du textile au bois sculpté. Trouvez le produit artisanal parfait.", badge: "1000+ PRODUITS PRO", link: "#" },
-    { icon: "sun", title: "Rejoignez-nous", description: "Lancez votre boutique en quelques clics. Vendez vos créations au monde entier.", badge: "INSCRIPTION SIMPLE", link: "#" },
+    { icon: "palette", title: "Artisans du Monde", description: "Connectez-vous avec des artisans talentueux des 4 coins du globe. Découvrez des créations authentiques et uniques.", badge: "20M+ ARTISANS", link: "/promo/artisans-du-monde" },
+    { icon: "shopping-bag", title: "Boutiques Personnalisées", description: "Chaque artisan dispose de sa propre boutique en ligne avec son sous-domaine unique.", badge: "GRATUIT CLASSIC", link: "/promo/boutiques-personnalisees" },
+    { icon: "gem", title: "Produits Premium", description: "De la céramique à la joaillerie, du textile au bois sculpté. Trouvez le produit artisanal parfait.", badge: "1000+ PRODUITS PRO", link: "/promo/produits-premium" },
+    { icon: "sun", title: "Rejoignez-nous", description: "Lancez votre boutique en quelques clics. Vendez vos créations au monde entier.", badge: "INSCRIPTION SIMPLE", link: "/promo/rejoignez-nous" },
   ]);
 
   // Shared state
@@ -572,7 +572,7 @@ const LoginPage = () => {
           {adCards.map((card, idx) => {
             const IconComponent = card.icon === 'shopping-bag' ? ShoppingBag : card.icon === 'gem' ? Gem : card.icon === 'sun' ? Sun : Palette;
             return (
-              <div key={idx} className="info-card" onClick={() => card.link !== '#' && (window.location.href = card.link)} style={{ cursor: card.link !== '#' ? 'pointer' : 'default' }}>
+              <div key={idx} className="info-card" onClick={() => { const slug = card.title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); navigate(`/promo/${slug}`); }} style={{ cursor: 'pointer' }}>
                 <div className="card-icon"><IconComponent size={32} /></div>
                 <h3>{card.title}</h3>
                 <p>{card.description}</p>
